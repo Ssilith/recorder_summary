@@ -11,8 +11,10 @@ class AboutApp extends StatefulWidget {
 }
 
 class _AboutAppState extends State<AboutApp> {
+  // current page index
   int _currentIndex = 0;
 
+  // title of page
   final List<String> _titles = [
     'WELCOME',
     'RECORD',
@@ -22,6 +24,7 @@ class _AboutAppState extends State<AboutApp> {
     'IDEAL FOR EVERYONE',
   ];
 
+  // description of page
   final List<String> _descriptions = [
     'Enhance your productivity and knowledge retention with our innovative application.',
     'Attend meetings, lectures, or conversations and easily record the audio with our built-in dictaphone.',
@@ -31,6 +34,7 @@ class _AboutAppState extends State<AboutApp> {
     'Whether you\'re a professional looking to streamline meeting notes or a student wanting to capture lecture points, our app is your perfect companion.',
   ];
 
+  // icon of page
   final List<IconData> _icons = [
     FontAwesomeIcons.handshake,
     FontAwesomeIcons.microphone,

@@ -12,24 +12,28 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
+  // title of container
   final List<String> _titles = [
     'Phone number',
     'Email',
     'LinkedIn',
   ];
 
+  // description of container
   final List<String> _descriptions = [
     '+48 739 971 584',
     'k.hajduk.wroclaw@gmail.com',
     'Katarzyna Hajduk',
   ];
 
+  // icons of container
   final List<IconData> _icons = [
     Icons.call,
     Icons.mail,
     FontAwesomeIcons.linkedin,
   ];
 
+  // container urls
   final List<String> _urls = [
     'tel:+48739971584',
     'mailto:k.hajduk.wroclaw@gmail.com',

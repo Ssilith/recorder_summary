@@ -1,4 +1,4 @@
-package com.example.recorder_summary
+package recorder.summary.recorder_summary
 
 import io.flutter.embedding.android.FlutterActivity
 

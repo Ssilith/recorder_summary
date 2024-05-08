@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:977236790960:android:80994b18a1274f8cf7b575",
         "android_client_info": {
-          "package_name": "com.example.recorder_summary"
+          "package_name": "recorder.summary.recorder_summary"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "977236790960-9gl7e9bokmkqdo2tlmkqp8iqfgfed840.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.recorder_summary",
+            "package_name": "recorder.summary.recorder_summary",
             "certificate_hash": "4ac1a6c5c1eb3a3b45ab17451a3a5e474a7b5803"
           }
         },

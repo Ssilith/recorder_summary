@@ -40,6 +40,20 @@ dependencies:
   # url
   url_launcher: ^6.2.6
 
+  # bottom navigation
+  animated_notch_bottom_bar: ^1.0.3
+
+  # record
+  audio_waveforms: ^1.0.5
+
+  # permission
+  permission_handler: ^11.3.1
+
+  # path
+  path: ^1.9.0
+  path_provider: ^2.1.3
+  file_picker: ^8.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

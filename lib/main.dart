@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,20 +10,21 @@ import 'package:provider/provider.dart';
 import 'package:recorder_summary/auth/login_page.dart';
 import 'package:recorder_summary/firebase_options.dart';
 import 'package:recorder_summary/providers/auth_provider.dart';
+import 'package:recorder_summary/recorder/main_recorder.dart';
 import 'package:recorder_summary/side_drawer.dart';
+import 'package:recorder_summary/summary/main_summary.dart';
+import 'package:recorder_summary/upload/main_upload.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   FlutterNativeSplash.remove();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -36,7 +38,6 @@ class MyApp extends StatelessWidget {
         builder: (context, _) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            navigatorKey: navigatorKey,
             title: 'Recorder Summary',
             themeMode: ThemeMode.dark,
             theme: ThemeData(
@@ -82,12 +83,37 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
 class _MyHomePageState extends State<MyHomePage> {
+  // pages controller
+  final _pageController = PageController(initialPage: 0);
+
+  // bottom navigation bar controlles
+  final NotchBottomBarController _controller =
+      NotchBottomBarController(index: 0);
+
   // open side drawer
   _openDrawer() {
     scaffoldKey.currentState!.openDrawer();
+  }
+
+  // main pages
+  final List<Widget> bottomBarPages = [
+    const MainRecorder(),
+    const MainUpload(),
+    const MainSummary(),
+  ];
+
+  // icons of navigation
+  final List<IconData> _icons = [
+    FontAwesomeIcons.microphone,
+    FontAwesomeIcons.upload,
+    FontAwesomeIcons.inbox,
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,10 +130,24 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.onSecondary,
       ),
       drawer: SideDrawer(authProvider: widget.authProvider),
-      body: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [],
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: List.generate(
+            bottomBarPages.length, (index) => bottomBarPages[index]),
       ),
+      bottomNavigationBar: AnimatedNotchBottomBar(
+          notchBottomBarController: _controller,
+          kBottomRadius: 28.0,
+          kIconSize: 24.0,
+          onTap: (index) => _pageController.jumpToPage(index),
+          bottomBarItems: _icons
+              .map((icon) => BottomBarItem(
+                    inActiveItem: Icon(icon, color: Colors.blueGrey),
+                    activeItem: Icon(icon,
+                        color: Theme.of(context).colorScheme.background),
+                  ))
+              .toList()),
     );
   }
 }
