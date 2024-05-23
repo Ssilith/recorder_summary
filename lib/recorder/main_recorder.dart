@@ -6,6 +6,8 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:recorder_summary/recorder/record_button.dart';
+import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:path/path.dart' as p;
 
@@ -19,15 +21,20 @@ class MainRecorder extends StatefulWidget {
 class _MainRecorderState extends State<MainRecorder> {
   late final RecorderController recorderController;
   PlayerController playerController = PlayerController();
+  TextEditingController renameController = TextEditingController();
 
   String? path;
   String? musicFile;
+
+  // record
   bool isRecording = false;
   bool isRecordingCompleted = false;
+  bool isRecordingStopped = true;
+
   bool isLoading = true;
-  bool isRecordingStopped = false;
   late Directory appDirectory;
 
+  // CHANGE TIMER TO PAUSABLE TIMER
   Timer? recordingTimer;
   Duration recordingDuration = Duration.zero;
 
@@ -44,7 +51,7 @@ class _MainRecorderState extends State<MainRecorder> {
   // directory for output path
   _getDirectory() async {
     appDirectory = await getApplicationDocumentsDirectory();
-    path = "${appDirectory.path}/recording.m4a";
+    path = "${appDirectory.path}/newRecording.m4a";
     setState(() {
       isLoading = false;
     });
@@ -63,77 +70,79 @@ class _MainRecorderState extends State<MainRecorder> {
     recorderController.refresh();
   }
 
-  // record or stop recording
-  _startOrStopRecording() async {
+  _startRecording() async {
     try {
-      if (isRecording) {
-        await recorderController.stop();
-        recordingTimer?.cancel();
+      if (!isRecording) {
+        await recorderController.record();
 
-        // Rename logic with debug
-        String? newName = await _showRenameDialog();
-        if (newName != null && newName.trim().isNotEmpty) {
-          String newPath = p.join(appDirectory.path, '$newName.m4a');
-          await File(path!).rename(newPath);
-          path = newPath;
-        }
-        await playerController.preparePlayer(
-            path: path!, shouldExtractWaveform: true);
-
-        setState(() {
-          isRecordingCompleted = true;
-          isRecording = false;
-          isRecordingStopped = false;
-          recordingDuration = Duration.zero;
-
-          recorderController.refresh();
-        });
-      } else {
-        if (isRecordingCompleted) {
-          recorderController.reset();
-        }
-        path = p.join(
-            appDirectory.path, '${DateTime.now().millisecondsSinceEpoch}.m4a');
-        await recorderController.record(path: path);
         recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
           setState(() {
             recordingDuration += const Duration(seconds: 1);
           });
         });
+
         setState(() {
           isRecording = true;
-          isRecordingCompleted = false;
           isRecordingStopped = false;
-          playerController.release();
+          isRecordingCompleted = false;
         });
+      }
+    } catch (e) {
+      message(context, 'Failure', 'Failed to start recording');
+    }
+  }
+
+  _pauseOrContinueRecording() async {
+    try {
+      if (isRecording) {
+        if (isRecordingStopped) {
+          await recorderController.record();
+
+          recordingTimer =
+              Timer.periodic(const Duration(seconds: 1), (Timer t) {
+            setState(() {
+              recordingDuration += const Duration(seconds: 1);
+            });
+          });
+          setState(() {
+            isRecordingStopped = false;
+          });
+        } else {
+          await recorderController.pause();
+
+          recordingTimer?.cancel();
+          setState(() {
+            isRecordingStopped = true;
+          });
+        }
       }
     } catch (e) {
       message(context, "Failure", "Error in handling recording");
     }
   }
 
-  // pause or play recording
-  _pauseOrPlayRecording() async {
+  _stopRecording() async {
     try {
-      if (isRecordingStopped) {
-        // Resume recording
-        await recorderController.record();
-        // Restart the timer as recording resumes
-        recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-          setState(() {
-            recordingDuration += const Duration(seconds: 1);
-          });
-        });
-        setState(() {
-          isRecordingStopped = false;
-        });
-      } else {
-        // Pause recording
-        await recorderController.pause();
-        // Stop the timer as recording pauses
+      if (isRecording) {
+        await recorderController.stop();
         recordingTimer?.cancel();
+
+        String? newName = await _showRenameDialog();
+        if (newName != null && newName.trim().isNotEmpty) {
+          String newPath = p.join(appDirectory.path, '$newName.m4a');
+          await File(path!).rename(newPath);
+          path = newPath;
+        }
+
         setState(() {
-          isRecordingStopped = true;
+          isRecording = false;
+          isRecordingCompleted = true;
+          isRecordingStopped = false;
+          renameController.clear();
+          recordingDuration = Duration.zero;
+          recorderController.refresh();
+          recorderController.reset();
+          // playerController.release();
         });
       }
     } catch (e) {
@@ -190,10 +199,34 @@ class _MainRecorderState extends State<MainRecorder> {
   @override
   void dispose() {
     recorderController.dispose();
-    playerController.dispose();
-
     playerController.release();
+    playerController.dispose();
     super.dispose();
+  }
+
+  _showRenameDialog() {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialogWithTextField(
+          title: "Rename recording",
+          description: "Enter new file name",
+          hint: "Name",
+          controller: renameController,
+          showCancelButton: false,
+          onPressed: () {
+            if (renameController.text.isEmpty) {
+              message(context, 'Failure', 'Name cannot be empty');
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          icon: const Icon(Icons.text_format_rounded),
+          confirmButtonText: "Save",
+        );
+      },
+    );
   }
 
   @override
@@ -210,7 +243,6 @@ class _MainRecorderState extends State<MainRecorder> {
               Text('Recording Time: $recordingDuration'),
               Text(
                   'Playback Time: ${playbackDuration.inMinutes}:${(playbackDuration.inSeconds % 60).toString().padLeft(2, '0')}'),
-
               isRecordingCompleted
                   ? AudioFileWaveforms(
                       enableSeekGesture: true,
@@ -246,7 +278,6 @@ class _MainRecorderState extends State<MainRecorder> {
                           borderRadius: BorderRadius.circular(10)),
                       margin: const EdgeInsets.symmetric(horizontal: 15),
                     ),
-              // const Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -254,63 +285,37 @@ class _MainRecorderState extends State<MainRecorder> {
                     icon: const Icon(Icons.file_upload_outlined),
                     onPressed: _pickFile,
                   ),
-                  IconButton(
-                    icon: Ink(
-                      decoration: BoxDecoration(
-                          color: isRecording ? Colors.white : Colors.red,
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(color: Colors.white, width: 2)),
-                      child: Icon(isRecording ? Icons.stop : Icons.circle,
-                          size: 35),
-                    ),
-                    color: isRecording ? Colors.black : Colors.red,
-                    onPressed: _startOrStopRecording,
+                  RecordButton(
+                    isRecording: isRecording,
+                    isRecordingStopped: isRecordingStopped,
+                    onPressed: () {
+                      if (!isRecording) {
+                        _startRecording();
+                      } else {
+                        _pauseOrContinueRecording();
+                      }
+                    },
                   ),
-                  IconButton(
-                      icon: Icon(
-                          isRecordingStopped ? Icons.play_arrow : Icons.pause),
-                      onPressed: () {
-                        if (isRecording) {
-                          _pauseOrPlayRecording();
-                        } else if (isRecordingCompleted) {
+                  if (isRecording)
+                    IconButton(
+                      icon: const Icon(Icons.stop),
+                      onPressed: () async {
+                        await _stopRecording();
+                        await playerController.preparePlayer(
+                            path: path!, shouldExtractWaveform: true);
+                      },
+                    )
+                  else
+                    IconButton(
+                        icon: Icon(isRecordingStopped
+                            ? Icons.play_arrow
+                            : Icons.pause),
+                        onPressed: () {
                           _startOrStopPlayer();
-                        }
-                      })
+                        })
                 ],
               ),
             ],
           );
-  }
-
-  Future<String?> _showRenameDialog() async {
-    TextEditingController renameController = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Rename Recording'),
-          content: TextField(
-            controller: renameController,
-            decoration: const InputDecoration(
-              hintText: 'Enter new file name',
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                Navigator.of(context).pop(renameController.text);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }

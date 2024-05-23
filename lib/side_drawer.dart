@@ -7,7 +7,7 @@ import 'package:recorder_summary/main.dart';
 import 'package:recorder_summary/providers/auth_provider.dart';
 import 'package:recorder_summary/side_drawer_pages/about_app.dart';
 import 'package:recorder_summary/side_drawer_pages/contact_us.dart';
-import 'package:recorder_summary/widgets/alert_dialog.dart';
+import 'package:recorder_summary/widgets/dialogs/my_alert_dialog.dart';
 import 'package:recorder_summary/widgets/message.dart';
 
 class SideDrawer extends StatelessWidget {
@@ -24,19 +24,16 @@ class SideDrawer extends StatelessWidget {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              contentPadding: EdgeInsets.zero,
-              content: MyAlertDialog(
-                title: "Log out",
-                description:
-                    "Are you sure you wanna log out from your account?",
-                onPressed: () async {
-                  await authProvider.signOut();
-                  Navigator.of(context).pop();
-                  message(context, 'Success',
-                      "You have been successfully logged out", 'success');
-                },
-              ));
+          return MyAlertDialog(
+            title: "Log out",
+            description: "Are you sure you wanna log out from your account?",
+            onPressed: () async {
+              await authProvider.signOut();
+              Navigator.of(context).pop();
+              message(context, 'Success',
+                  "You have been successfully logged out", 'success');
+            },
+          );
         });
   }
 
@@ -45,22 +42,19 @@ class SideDrawer extends StatelessWidget {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              contentPadding: EdgeInsets.zero,
-              content: MyAlertDialog(
-                title: "Delete account",
-                description:
-                    "Are you sure you wanna delete this account?\nThis action cannot be undone.",
-                onPressed: () async {
-                  await authProvider.deleteUserAccount();
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) =>
-                          LoginPage(authProvider: authProvider)));
-                  message(context, 'Success',
-                      "The account has been successfully deleted", 'success');
-                },
-              ));
+          return MyAlertDialog(
+            title: "Delete account",
+            description:
+                "Are you sure you wanna delete this account?\nThis action cannot be undone.",
+            onPressed: () async {
+              await authProvider.deleteUserAccount();
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => LoginPage(authProvider: authProvider)));
+              message(context, 'Success',
+                  "The account has been successfully deleted", 'success');
+            },
+          );
         });
   }
 

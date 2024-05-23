@@ -8,6 +8,7 @@ import 'package:recorder_summary/providers/auth_provider.dart';
 import 'package:recorder_summary/widgets/buttons/change_text_button.dart';
 import 'package:recorder_summary/widgets/buttons/google_sign_in_button.dart';
 import 'package:recorder_summary/widgets/buttons/round_button.dart';
+import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:recorder_summary/widgets/text_inputs/text_divider.dart';
 import 'package:recorder_summary/widgets/text_inputs/text_input_form.dart';
@@ -34,59 +35,22 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Forgot your password?",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
-                  const SizedBox(height: 5),
-                  Text(
-                      "Write your email address and we will send you a reset link.",
-                      style: TextStyle(color: Theme.of(context).hintColor),
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 10),
-                  TextInputForm(
-                    controller: _remindEmail,
-                    width: 400,
-                    hint: "Email",
-                    prefixIcon: const Icon(Icons.email),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: RoundButton(
-                        title: "Cancel",
-                        textColor: Theme.of(context).dialogBackgroundColor,
-                        onPressed: () {
-                          _remindEmail.clear();
-                          Navigator.pop(context);
-                        },
-                      )),
-                      const SizedBox(width: 20),
-                      Expanded(
-                          child: RoundButton(
-                        title: "Send",
-                        textColor: Theme.of(context).dialogBackgroundColor,
-                        onPressed: () async {
-                          try {
-                            await resetPassword(_remindEmail.text);
-                          } catch (e) {
-                            message(context, 'Failure', "Failed to send email");
-                          }
-                        },
-                      )),
-                    ],
-                  )
-                ],
-              )),
+        return AlertDialogWithTextField(
+          title: "Forgot your password?",
+          description:
+              "Write your email address and we will send you a reset link.",
+          hint: "Email",
+          controller: _remindEmail,
+          icon: const Icon(Icons.email),
+          confirmButtonText: "Send",
+          onPressed: () async {
+            try {
+              await resetPassword(_remindEmail.text);
+              message(context, 'Success', "Email was send successfully");
+            } catch (e) {
+              message(context, 'Failure', "Failed to send email");
+            }
+          },
         );
       },
     );
