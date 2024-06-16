@@ -51,7 +51,7 @@ class _MainRecorderState extends State<MainRecorder> {
   // directory for output path
   _getDirectory() async {
     appDirectory = await getApplicationDocumentsDirectory();
-    path = "${appDirectory.path}/newRecording.m4a";
+    path = "${appDirectory.path}/newRecording.wav";
     setState(() {
       isLoading = false;
     });
@@ -127,12 +127,36 @@ class _MainRecorderState extends State<MainRecorder> {
         await recorderController.stop();
         recordingTimer?.cancel();
 
-        String? newName = await _showRenameDialog();
-        if (newName != null && newName.trim().isNotEmpty) {
-          String newPath = p.join(appDirectory.path, '$newName.m4a');
-          await File(path!).rename(newPath);
-          path = newPath;
-        }
+        bool isNameCorrect = false;
+
+        do {
+          await _showRenameDialog();
+          String? newName = renameController.text;
+          setState(() {
+            path = p.join(appDirectory.path, '$newName.wav');
+          });
+          if (await File(path!).exists()) {
+            message(context, "Failure", "File already exists");
+            setState(() {
+              isNameCorrect = false;
+            });
+          } else {
+            await File(path!).create();
+            setState(() {
+              isNameCorrect = true;
+            });
+          }
+        } while (!isNameCorrect);
+
+        // try {
+        print(path);
+        await playerController.preparePlayer(
+            path: path!, shouldExtractWaveform: true);
+        print("Player prepared successfully");
+        // } catch (e) {
+        //   print("Error in preparing player: $e");
+        //   message(context, "Failure", "Error preparing player: $e");
+        // }
 
         setState(() {
           isRecording = false;
@@ -298,21 +322,13 @@ class _MainRecorderState extends State<MainRecorder> {
                   ),
                   if (isRecording)
                     IconButton(
-                      icon: const Icon(Icons.stop),
-                      onPressed: () async {
-                        await _stopRecording();
-                        await playerController.preparePlayer(
-                            path: path!, shouldExtractWaveform: true);
-                      },
-                    )
+                        icon: const Icon(Icons.stop), onPressed: _stopRecording)
                   else
                     IconButton(
                         icon: Icon(isRecordingStopped
                             ? Icons.play_arrow
                             : Icons.pause),
-                        onPressed: () {
-                          _startOrStopPlayer();
-                        })
+                        onPressed: _startOrStopPlayer)
                 ],
               ),
             ],
