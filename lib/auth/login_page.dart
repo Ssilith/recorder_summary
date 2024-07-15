@@ -1,8 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:recorder_summary/auth/auth_page.dart';
 import 'package:recorder_summary/auth/sign_up_page.dart';
 import 'package:recorder_summary/main.dart';

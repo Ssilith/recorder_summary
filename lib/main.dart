@@ -24,8 +24,6 @@ void main() async {
   runApp(const MyApp());
 }
 
-final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -84,6 +82,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // scaffold global key
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   // pages controller
   final _pageController = PageController(initialPage: 0);
 
@@ -94,6 +95,11 @@ class _MyHomePageState extends State<MyHomePage> {
   // open side drawer
   _openDrawer() {
     scaffoldKey.currentState!.openDrawer();
+  }
+
+  // close side drawer
+  _closeDrawer() {
+    scaffoldKey.currentState?.closeDrawer();
   }
 
   // main pages
@@ -129,7 +135,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         backgroundColor: Theme.of(context).colorScheme.onSecondary,
       ),
-      drawer: SideDrawer(authProvider: widget.authProvider),
+      drawer: SideDrawer(
+        authProvider: widget.authProvider,
+        onClose: _closeDrawer,
+      ),
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),

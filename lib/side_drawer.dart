@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:recorder_summary/auth/login_page.dart';
-import 'package:recorder_summary/main.dart';
 import 'package:recorder_summary/providers/auth_provider.dart';
 import 'package:recorder_summary/side_drawer_pages/about_app.dart';
 import 'package:recorder_summary/side_drawer_pages/contact_us.dart';
@@ -12,12 +11,9 @@ import 'package:recorder_summary/widgets/message.dart';
 
 class SideDrawer extends StatelessWidget {
   final AuthProvider authProvider;
-  const SideDrawer({super.key, required this.authProvider});
-
-  // close side drawer
-  _closeDrawer() {
-    scaffoldKey.currentState?.closeDrawer();
-  }
+  final VoidCallback onClose;
+  const SideDrawer(
+      {super.key, required this.authProvider, required this.onClose});
 
   // log out popup
   _logOut(BuildContext context) {
@@ -90,18 +86,18 @@ class SideDrawer extends StatelessWidget {
         children: [
           DrawerTile(
             onTap: () {
-              _closeDrawer();
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const AboutApp()));
+              onClose();
             },
             text: "About app",
             iconData: Icons.info,
           ),
           DrawerTile(
             onTap: () {
-              _closeDrawer();
               Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const ContactUs()));
+              onClose();
             },
             text: "Contact us",
             iconData: MdiIcons.phone,
