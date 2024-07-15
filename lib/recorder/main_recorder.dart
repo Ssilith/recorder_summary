@@ -11,6 +11,10 @@ import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.da
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:path/path.dart' as p;
 
+// enum RecordingState { idle, recording, paused, finished }
+
+// enum PlayerState { idle, playing, paused, finished }
+
 class MainRecorder extends StatefulWidget {
   const MainRecorder({super.key});
 
@@ -29,17 +33,18 @@ class _MainRecorderState extends State<MainRecorder> {
   String? musicFile;
   late Directory appDirectory;
 
-  // record
+  // record state management
   bool isRecording = false;
   bool isRecordingCompleted = false;
   bool isRecordingStopped = true;
 
+  // UI loading state
   bool isLoading = true;
 
-  // CHANGE TIMER TO PAUSABLE TIMER
+  // TODO: CHANGE TIMER TO PAUSABLE TIMER
+  // timers for updating recording and playback durations
   Timer? recordingTimer;
   Duration recordingDuration = Duration.zero;
-
   Timer? playbackTimer;
   Duration playbackDuration = Duration.zero;
 
@@ -50,14 +55,14 @@ class _MainRecorderState extends State<MainRecorder> {
     _initialiseControllers();
   }
 
-  // directory for output path
+  // retrieve the directory for output path
   _getDirectory() async {
     appDirectory = await getApplicationDocumentsDirectory();
     path = "${appDirectory.path}/recording.m4a";
     setState(() => isLoading = false);
   }
 
-  // controller settings
+  // initialize controller settings
   _initialiseControllers() {
     recorderController = RecorderController()
       ..androidEncoder = AndroidEncoder.aac
@@ -66,6 +71,7 @@ class _MainRecorderState extends State<MainRecorder> {
       ..sampleRate = 44100;
   }
 
+  // start the recording process
   _startRecording() async {
     if (!isRecording) {
       try {
@@ -83,12 +89,14 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  // start the timer that updates the recording duration.
   _startRecordingTimer() {
     recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       setState(() => recordingDuration += const Duration(seconds: 1));
     });
   }
 
+  // toggle the recording state between pause and continue
   _pauseOrContinueRecording() async {
     if (isRecording) {
       try {
@@ -109,6 +117,7 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  // stop the recording and handles file renaming and preparation for playback
   _stopRecording() async {
     try {
       if (isRecording) {
@@ -131,7 +140,9 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  // handle file renaming and checks for file existence
   _handleRecordingCompletion() async {
+    // ensure the recorded file exists
     if (!File(path!).existsSync()) {
       message(context, "Error", "Original file does not exist.");
       return;
@@ -139,6 +150,7 @@ class _MainRecorderState extends State<MainRecorder> {
 
     bool isNameCorrect = false;
 
+    // handle file renaming
     do {
       await _showRenameDialog();
       String? newName = renameController.text;
@@ -149,11 +161,13 @@ class _MainRecorderState extends State<MainRecorder> {
       } else {
         String newPath = p.join(appDirectory.path, "$newName.m4a");
 
+        // create directory if it does not exist
         String directoryPath = p.dirname(newPath);
         if (!Directory(directoryPath).existsSync()) {
           await Directory(directoryPath).create(recursive: true);
         }
 
+        // check if file with new name already exists
         if (File(newPath).existsSync()) {
           message(context, "Failure", "File already exists with this name.");
         } else {
@@ -168,6 +182,8 @@ class _MainRecorderState extends State<MainRecorder> {
         }
       }
     } while (!isNameCorrect);
+
+    // if renaming was successful prepare the player
     if (isNameCorrect) {
       try {
         await playerController.preparePlayer(
@@ -202,6 +218,7 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  // start the timer that updates the playback duration.
   _startPlaybackTimer() {
     playbackTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       if (playerController.playerState.isPlaying) {
@@ -212,7 +229,7 @@ class _MainRecorderState extends State<MainRecorder> {
     });
   }
 
-  // open a file
+  // open a file picker to select an audio file for playback
   _pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -238,6 +255,7 @@ class _MainRecorderState extends State<MainRecorder> {
     super.dispose();
   }
 
+  // display a dialog for renaming the recording.
   _showRenameDialog() {
     return showDialog(
       context: context,
