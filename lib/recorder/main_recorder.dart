@@ -1,19 +1,18 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:async';
 import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:recorder_summary/recorder/record_button.dart';
+import 'package:recorder_summary/recorder/timer_container.dart';
+import 'package:recorder_summary/recorder/wave_container.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:path/path.dart' as p;
 
-// enum RecordingState { idle, recording, paused, finished }
-
-// enum PlayerState { idle, playing, paused, finished }
+enum RecordingState { idle, recording, paused, finished, playing }
 
 class MainRecorder extends StatefulWidget {
   const MainRecorder({super.key});
@@ -34,19 +33,10 @@ class _MainRecorderState extends State<MainRecorder> {
   late Directory appDirectory;
 
   // record state management
-  bool isRecording = false;
-  bool isRecordingCompleted = false;
-  bool isRecordingStopped = true;
+  RecordingState recordingState = RecordingState.idle;
 
-  // UI loading state
+  // ui loading state
   bool isLoading = true;
-
-  // TODO: CHANGE TIMER TO PAUSABLE TIMER
-  // timers for updating recording and playback durations
-  Timer? recordingTimer;
-  Duration recordingDuration = Duration.zero;
-  Timer? playbackTimer;
-  Duration playbackDuration = Duration.zero;
 
   @override
   void initState() {
@@ -73,43 +63,29 @@ class _MainRecorderState extends State<MainRecorder> {
 
   // start the recording process
   _startRecording() async {
-    if (!isRecording) {
+    if (recordingState != RecordingState.recording) {
       try {
         await recorderController.record();
-        _startRecordingTimer();
-
-        setState(() {
-          isRecording = true;
-          isRecordingStopped = false;
-          isRecordingCompleted = false;
-        });
+        setState(() => recordingState = RecordingState.recording);
       } catch (e) {
         message(context, 'Failure', 'Failed to start recording');
       }
     }
   }
 
-  // start the timer that updates the recording duration.
-  _startRecordingTimer() {
-    recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      setState(() => recordingDuration += const Duration(seconds: 1));
-    });
-  }
-
   // toggle the recording state between pause and continue
   _pauseOrContinueRecording() async {
-    if (isRecording) {
+    if (recordingState == RecordingState.paused ||
+        recordingState == RecordingState.recording) {
       try {
-        if (isRecordingStopped) {
+        if (recordingState == RecordingState.paused) {
+          // start the recorder
           await recorderController.record();
-          _startRecordingTimer();
-
-          setState(() => isRecordingStopped = false);
+          setState(() => recordingState = RecordingState.recording);
         } else {
+          // pause the recorder
           await recorderController.pause();
-
-          recordingTimer?.cancel();
-          setState(() => isRecordingStopped = true);
+          setState(() => recordingState = RecordingState.paused);
         }
       } catch (e) {
         message(context, "Failure", "Error in handling recording");
@@ -120,17 +96,13 @@ class _MainRecorderState extends State<MainRecorder> {
   // stop the recording and handles file renaming and preparation for playback
   _stopRecording() async {
     try {
-      if (isRecording) {
+      if (recordingState == RecordingState.recording ||
+          recordingState == RecordingState.paused) {
         path = await recorderController.stop();
-        recordingTimer?.cancel();
         await _handleRecordingCompletion();
-
         setState(() {
-          isRecording = false;
-          isRecordingCompleted = true;
-          isRecordingStopped = false;
+          recordingState = RecordingState.finished;
           renameController.clear();
-          recordingDuration = Duration.zero;
           recorderController.refresh();
           recorderController.reset();
         });
@@ -197,20 +169,16 @@ class _MainRecorderState extends State<MainRecorder> {
   // start or stop player
   _startOrStopPlayer() async {
     try {
-      if (isRecordingCompleted) {
+      if (recordingState == RecordingState.finished ||
+          recordingState == RecordingState.playing) {
         if (playerController.playerState.isPlaying) {
-          // Pause the player
-          playerController.pausePlayer();
-          // Stop the timer when the player is paused
-          playbackTimer?.cancel();
-          setState(() {});
+          // pause the player
+          await playerController.pausePlayer();
+          setState(() => recordingState = RecordingState.finished);
         } else {
-          // Start the player
-          playerController.startPlayer();
-          // Reset the playback duration when starting from pause or stop
-          playbackDuration = Duration.zero;
-          // Start a new timer to update playback duration
-          _startPlaybackTimer();
+          // start the player
+          await playerController.startPlayer();
+          setState(() => recordingState = RecordingState.playing);
         }
       }
     } catch (e) {
@@ -218,25 +186,22 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
-  // start the timer that updates the playback duration.
-  _startPlaybackTimer() {
-    playbackTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      if (playerController.playerState.isPlaying) {
-        setState(() => playbackDuration += const Duration(seconds: 1));
-      } else {
-        playbackTimer?.cancel();
-      }
-    });
-  }
-
   // open a file picker to select an audio file for playback
   _pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result != null) {
-        musicFile = result.files.single.path;
-        await playerController.preparePlayer(
-            path: musicFile!, shouldExtractWaveform: true);
+        await playerController.release();
+        try {
+          musicFile = result.files.single.path;
+          await playerController.preparePlayer(
+              path: musicFile!, shouldExtractWaveform: true);
+          setState(() => recordingState = RecordingState.finished);
+        } catch (e) {
+          setState(() => recordingState = RecordingState.idle);
+
+          message(context, "Failure", "An error occured");
+        }
       } else {
         message(context, "Failure", "File not picked");
       }
@@ -247,8 +212,6 @@ class _MainRecorderState extends State<MainRecorder> {
 
   @override
   void dispose() {
-    recordingTimer?.cancel();
-    playbackTimer?.cancel();
     recorderController.dispose();
     playerController.release();
     playerController.dispose();
@@ -283,7 +246,6 @@ class _MainRecorderState extends State<MainRecorder> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return isLoading
         ? const Center(
             child: CircularProgressIndicator(),
@@ -292,44 +254,18 @@ class _MainRecorderState extends State<MainRecorder> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('Recording Time: $recordingDuration'),
-              Text(
-                  'Playback Time: ${playbackDuration.inMinutes}:${(playbackDuration.inSeconds % 60).toString().padLeft(2, '0')}'),
-              isRecordingCompleted
-                  ? AudioFileWaveforms(
-                      enableSeekGesture: true,
-                      size: Size(size.width, 120),
-                      playerController: playerController,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10)),
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      playerWaveStyle: PlayerWaveStyle(
-                        showSeekLine: true,
-                        seekLineColor: Colors.white,
-                        liveWaveColor: Theme.of(context).colorScheme.primary,
-                      ),
-                    )
-                  : AudioWaveforms(
-                      enableGesture: true,
-                      shouldCalculateScrolledPosition: true,
-                      size: Size(size.width, 100),
-                      recorderController: recorderController,
-                      waveStyle: WaveStyle(
-                        waveColor: Theme.of(context).colorScheme.primary,
-                        extendWaveform: true,
-                        showMiddleLine: false,
-                        showDurationLabel: true,
-                        showHourInDuration: true,
-                        durationLinesColor: Colors.white,
-                        durationLinesHeight: 15,
-                        middleLineThickness: 1,
-                        durationStyle: const TextStyle(color: Colors.white),
-                        labelSpacing: BorderSide.strokeAlignOutside,
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10)),
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                    ),
+              TimerContainer(
+                isPlayer: (recordingState == RecordingState.finished ||
+                    recordingState == RecordingState.playing),
+                recorderController: recorderController,
+                playerController: playerController,
+              ),
+              WaveContainer(
+                isPlayer: (recordingState == RecordingState.finished ||
+                    recordingState == RecordingState.playing),
+                playerController: playerController,
+                recorderController: recorderController,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -338,22 +274,23 @@ class _MainRecorderState extends State<MainRecorder> {
                     onPressed: _pickFile,
                   ),
                   RecordButton(
-                    isRecording: isRecording,
-                    isRecordingStopped: isRecordingStopped,
+                    recordingState: recordingState,
                     onPressed: () {
-                      if (!isRecording) {
+                      if (recordingState != RecordingState.recording) {
                         _startRecording();
                       } else {
                         _pauseOrContinueRecording();
                       }
                     },
                   ),
-                  if (isRecording)
+                  if (recordingState == RecordingState.recording ||
+                      recordingState == RecordingState.paused)
                     IconButton(
                         icon: const Icon(Icons.stop), onPressed: _stopRecording)
                   else
                     IconButton(
-                        icon: Icon(isRecordingStopped
+                        icon: Icon(recordingState == RecordingState.finished &&
+                                recordingState != RecordingState.playing
                             ? Icons.play_arrow
                             : Icons.pause),
                         onPressed: _startOrStopPlayer)

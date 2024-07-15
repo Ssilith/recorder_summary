@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:recorder_summary/recorder/main_recorder.dart';
 
 class RecordButton extends StatelessWidget {
-  final bool isRecordingStopped;
-  final bool isRecording;
+  final RecordingState recordingState;
   final VoidCallback onPressed;
   const RecordButton(
-      {super.key,
-      required this.isRecordingStopped,
-      required this.onPressed,
-      required this.isRecording});
+      {super.key, required this.recordingState, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return !isRecording
+    return (recordingState != RecordingState.recording &&
+            recordingState != RecordingState.paused)
         ? IconButton(
             icon: Ink(
               decoration: BoxDecoration(
@@ -30,7 +28,10 @@ class RecordButton extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(color: Colors.white, width: 2)),
-              child: Icon(!isRecordingStopped ? Icons.pause : Icons.play_arrow,
+              child: Icon(
+                  recordingState != RecordingState.paused
+                      ? Icons.pause
+                      : Icons.play_arrow,
                   size: 35),
             ),
             color: Colors.black,
