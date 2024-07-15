@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:recorder_summary/auth/auth_page.dart';
 import 'package:recorder_summary/auth/sign_up_page.dart';
 import 'package:recorder_summary/main.dart';
@@ -29,6 +31,9 @@ class _LoginPageState extends State<LoginPage> {
 
   // remeber me bool
   bool _rememberMe = true;
+
+  // check if is loading
+  bool isLoading = false;
 
   // forgot password dialog
   forgotPasswordWindow() {
@@ -137,22 +142,39 @@ class _LoginPageState extends State<LoginPage> {
                 }
               }),
           const SizedBox(height: 20),
-          RoundButton(
-            height: 60,
-            onPressed: () async {
-              await widget.authProvider.signInWithEmailAndPassword(
-                  _email.text, _password.text, _rememberMe);
-              if (widget.authProvider.user != null) {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) =>
-                      MyHomePage(authProvider: widget.authProvider),
-                ));
-              } else {
-                message(context, 'Failure', "Failed to log in");
-              }
-            },
-            title: "LOGIN",
-            textColor: Theme.of(context).scaffoldBackgroundColor,
+          Stack(
+            children: [
+              Center(
+                child: RoundButton(
+                  height: 60,
+                  onPressed: () async {
+                    setState(() => isLoading = true);
+                    await widget.authProvider.signInWithEmailAndPassword(
+                        _email.text, _password.text, _rememberMe);
+                    if (widget.authProvider.user != null) {
+                      setState(() => isLoading = false);
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) =>
+                            MyHomePage(authProvider: widget.authProvider),
+                      ));
+                    } else {
+                      setState(() => isLoading = false);
+                      message(context, 'Failure', "Failed to log in");
+                    }
+                  },
+                  title: isLoading ? "" : "LOGIN",
+                  textColor: Theme.of(context).scaffoldBackgroundColor,
+                ),
+              ),
+              if (isLoading)
+                SizedBox(
+                  height: 60,
+                  child: Center(
+                      child: CircularProgressIndicator(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                  )),
+                )
+            ],
           ),
           TextButton(
               onPressed: forgotPasswordWindow,

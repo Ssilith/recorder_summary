@@ -19,12 +19,15 @@ class MainRecorder extends StatefulWidget {
 }
 
 class _MainRecorderState extends State<MainRecorder> {
+  // controllers
   late final RecorderController recorderController;
   PlayerController playerController = PlayerController();
   TextEditingController renameController = TextEditingController();
 
+  // paths
   String? path;
   String? musicFile;
+  late Directory appDirectory;
 
   // record
   bool isRecording = false;
@@ -32,7 +35,6 @@ class _MainRecorderState extends State<MainRecorder> {
   bool isRecordingStopped = true;
 
   bool isLoading = true;
-  late Directory appDirectory;
 
   // CHANGE TIMER TO PAUSABLE TIMER
   Timer? recordingTimer;
@@ -51,10 +53,8 @@ class _MainRecorderState extends State<MainRecorder> {
   // directory for output path
   _getDirectory() async {
     appDirectory = await getApplicationDocumentsDirectory();
-    path = "${appDirectory.path}/newRecording.wav";
-    setState(() {
-      isLoading = false;
-    });
+    path = "${appDirectory.path}/recording.m4a";
+    setState(() => isLoading = false);
   }
 
   // controller settings
@@ -62,101 +62,59 @@ class _MainRecorderState extends State<MainRecorder> {
     recorderController = RecorderController()
       ..androidEncoder = AndroidEncoder.aac
       ..androidOutputFormat = AndroidOutputFormat.mpeg4
+      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
       ..sampleRate = 44100;
   }
 
-  // refresh
-  _refreshWave() {
-    recorderController.refresh();
-  }
-
   _startRecording() async {
-    try {
-      if (!isRecording) {
+    if (!isRecording) {
+      try {
         await recorderController.record();
-
-        recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-          setState(() {
-            recordingDuration += const Duration(seconds: 1);
-          });
-        });
+        _startRecordingTimer();
 
         setState(() {
           isRecording = true;
           isRecordingStopped = false;
           isRecordingCompleted = false;
         });
+      } catch (e) {
+        message(context, 'Failure', 'Failed to start recording');
       }
-    } catch (e) {
-      message(context, 'Failure', 'Failed to start recording');
     }
   }
 
+  _startRecordingTimer() {
+    recordingTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      setState(() => recordingDuration += const Duration(seconds: 1));
+    });
+  }
+
   _pauseOrContinueRecording() async {
-    try {
-      if (isRecording) {
+    if (isRecording) {
+      try {
         if (isRecordingStopped) {
           await recorderController.record();
+          _startRecordingTimer();
 
-          recordingTimer =
-              Timer.periodic(const Duration(seconds: 1), (Timer t) {
-            setState(() {
-              recordingDuration += const Duration(seconds: 1);
-            });
-          });
-          setState(() {
-            isRecordingStopped = false;
-          });
+          setState(() => isRecordingStopped = false);
         } else {
           await recorderController.pause();
 
           recordingTimer?.cancel();
-          setState(() {
-            isRecordingStopped = true;
-          });
+          setState(() => isRecordingStopped = true);
         }
+      } catch (e) {
+        message(context, "Failure", "Error in handling recording");
       }
-    } catch (e) {
-      message(context, "Failure", "Error in handling recording");
     }
   }
 
   _stopRecording() async {
     try {
       if (isRecording) {
-        await recorderController.stop();
+        path = await recorderController.stop();
         recordingTimer?.cancel();
-
-        bool isNameCorrect = false;
-
-        do {
-          await _showRenameDialog();
-          String? newName = renameController.text;
-          setState(() {
-            path = p.join(appDirectory.path, '$newName.wav');
-          });
-          if (await File(path!).exists()) {
-            message(context, "Failure", "File already exists");
-            setState(() {
-              isNameCorrect = false;
-            });
-          } else {
-            await File(path!).create();
-            setState(() {
-              isNameCorrect = true;
-            });
-          }
-        } while (!isNameCorrect);
-
-        // try {
-        print(path);
-        await playerController.preparePlayer(
-            path: path!, shouldExtractWaveform: true);
-        print("Player prepared successfully");
-        // } catch (e) {
-        //   print("Error in preparing player: $e");
-        //   message(context, "Failure", "Error preparing player: $e");
-        // }
+        await _handleRecordingCompletion();
 
         setState(() {
           isRecording = false;
@@ -166,11 +124,57 @@ class _MainRecorderState extends State<MainRecorder> {
           recordingDuration = Duration.zero;
           recorderController.refresh();
           recorderController.reset();
-          // playerController.release();
         });
       }
     } catch (e) {
       message(context, "Failure", "Error in handling recording");
+    }
+  }
+
+  _handleRecordingCompletion() async {
+    if (!File(path!).existsSync()) {
+      message(context, "Error", "Original file does not exist.");
+      return;
+    }
+
+    bool isNameCorrect = false;
+
+    do {
+      await _showRenameDialog();
+      String? newName = renameController.text;
+      if (newName.isEmpty) {
+        message(
+            context, "Failure", "Name cannot be empty or renaming cancelled.");
+        break;
+      } else {
+        String newPath = p.join(appDirectory.path, "$newName.m4a");
+
+        String directoryPath = p.dirname(newPath);
+        if (!Directory(directoryPath).existsSync()) {
+          await Directory(directoryPath).create(recursive: true);
+        }
+
+        if (File(newPath).existsSync()) {
+          message(context, "Failure", "File already exists with this name.");
+        } else {
+          try {
+            await File(path!).rename(newPath);
+            path = newPath;
+            isNameCorrect = true;
+          } catch (e) {
+            message(context, "Error", "Failed to rename file");
+            break;
+          }
+        }
+      }
+    } while (!isNameCorrect);
+    if (isNameCorrect) {
+      try {
+        await playerController.preparePlayer(
+            path: path!, shouldExtractWaveform: true);
+      } catch (e) {
+        message(context, "Failure", "Error preparing player");
+      }
     }
   }
 
@@ -190,17 +194,7 @@ class _MainRecorderState extends State<MainRecorder> {
           // Reset the playback duration when starting from pause or stop
           playbackDuration = Duration.zero;
           // Start a new timer to update playback duration
-          playbackTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-            if (playerController.playerState.isPlaying) {
-              setState(() {
-                playbackDuration += const Duration(seconds: 1);
-              });
-            } else {
-              // Stop the timer if playback is paused/stopped externally
-              playbackTimer?.cancel();
-            }
-          });
-          setState(() {});
+          _startPlaybackTimer();
         }
       }
     } catch (e) {
@@ -208,20 +202,36 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  _startPlaybackTimer() {
+    playbackTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      if (playerController.playerState.isPlaying) {
+        setState(() => playbackDuration += const Duration(seconds: 1));
+      } else {
+        playbackTimer?.cancel();
+      }
+    });
+  }
+
   // open a file
   _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      musicFile = result.files.single.path;
-      _refreshWave();
-      setState(() {});
-    } else {
-      message(context, "Failure", "File not picked");
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      if (result != null) {
+        musicFile = result.files.single.path;
+        await playerController.preparePlayer(
+            path: musicFile!, shouldExtractWaveform: true);
+      } else {
+        message(context, "Failure", "File not picked");
+      }
+    } catch (e) {
+      message(context, "Failure", "Error picking file");
     }
   }
 
   @override
   void dispose() {
+    recordingTimer?.cancel();
+    playbackTimer?.cancel();
     recorderController.dispose();
     playerController.release();
     playerController.dispose();

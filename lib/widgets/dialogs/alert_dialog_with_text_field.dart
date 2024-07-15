@@ -51,18 +51,16 @@ class AlertDialogWithTextField extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (showCancelButton)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 20),
-                      child: Expanded(
-                          child: RoundButton(
-                        title: "Cancel",
-                        textColor: Theme.of(context).dialogBackgroundColor,
-                        onPressed: () {
-                          controller.clear();
-                          Navigator.pop(context);
-                        },
-                      )),
-                    ),
+                    Expanded(
+                        child: RoundButton(
+                      title: "Cancel",
+                      textColor: Theme.of(context).dialogBackgroundColor,
+                      onPressed: () {
+                        controller.clear();
+                        Navigator.pop(context);
+                      },
+                    )),
+                  if (showCancelButton) const SizedBox(width: 5),
                   Expanded(
                       child: RoundButton(
                           title: confirmButtonText,
