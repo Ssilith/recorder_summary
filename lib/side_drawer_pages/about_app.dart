@@ -18,6 +18,7 @@ class _AboutAppState extends State<AboutApp> {
   final List<String> _titles = [
     'WELCOME',
     'RECORD',
+    'LISTEN',
     'UPLOAD',
     'SUMMARIZE',
     'RECEIVE',
@@ -28,6 +29,7 @@ class _AboutAppState extends State<AboutApp> {
   final List<String> _descriptions = [
     'Enhance your productivity and knowledge retention with our innovative application.',
     'Attend meetings, lectures, or conversations and easily record the audio with our built-in dictaphone.',
+    'Listen to your recorded content anytime, ensuring you never miss important details.',
     'Upload your recordings directly through the app with just a few taps.',
     'Once submitted, our advanced technology processes your recording and creates a concise summary.',
     'Receive a clear and informative summary directly in your email, ready to review and refer back to whenever needed.',
@@ -38,6 +40,7 @@ class _AboutAppState extends State<AboutApp> {
   final List<IconData> _icons = [
     FontAwesomeIcons.handshake,
     FontAwesomeIcons.microphone,
+    FontAwesomeIcons.headphones,
     FontAwesomeIcons.upload,
     FontAwesomeIcons.rectangleList,
     FontAwesomeIcons.inbox,
