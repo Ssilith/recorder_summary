@@ -14,39 +14,6 @@ class _AboutAppState extends State<AboutApp> {
   // current page index
   int _currentIndex = 0;
 
-  // title of page
-  final List<String> _titles = [
-    'WELCOME',
-    'RECORD',
-    'LISTEN',
-    'UPLOAD',
-    'SUMMARIZE',
-    'RECEIVE',
-    'IDEAL FOR EVERYONE',
-  ];
-
-  // description of page
-  final List<String> _descriptions = [
-    'Enhance your productivity and knowledge retention with our innovative application.',
-    'Attend meetings, lectures, or conversations and easily record the audio with our built-in dictaphone.',
-    'Listen to your recorded content anytime, ensuring you never miss important details.',
-    'Upload your recordings directly through the app with just a few taps.',
-    'Once submitted, our advanced technology processes your recording and creates a concise summary.',
-    'Receive a clear and informative summary directly in your email, ready to review and refer back to whenever needed.',
-    'Whether you\'re a professional looking to streamline meeting notes or a student wanting to capture lecture points, our app is your perfect companion.',
-  ];
-
-  // icon of page
-  final List<IconData> _icons = [
-    FontAwesomeIcons.handshake,
-    FontAwesomeIcons.microphone,
-    FontAwesomeIcons.headphones,
-    FontAwesomeIcons.upload,
-    FontAwesomeIcons.rectangleList,
-    FontAwesomeIcons.inbox,
-    FontAwesomeIcons.users
-  ];
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -114,3 +81,36 @@ class _AboutAppState extends State<AboutApp> {
     );
   }
 }
+
+// title of page
+final List<String> _titles = [
+  'WELCOME',
+  'RECORD',
+  'LISTEN',
+  'UPLOAD',
+  'SUMMARIZE',
+  'RECEIVE',
+  'IDEAL FOR EVERYONE',
+];
+
+// description of page
+final List<String> _descriptions = [
+  'Enhance your productivity and knowledge retention with our innovative application.',
+  'Attend meetings, lectures, or conversations and easily record the audio with our built-in dictaphone.',
+  'Listen to your recorded content anytime, ensuring you never miss important details.',
+  'Upload your recordings directly through the app with just a few taps.',
+  'Once submitted, our advanced technology processes your recording and creates a concise summary.',
+  'Receive a clear and informative summary directly in your email, ready to review and refer back to whenever needed.',
+  'Whether you\'re a professional looking to streamline meeting notes or a student wanting to capture lecture points, our app is your perfect companion.',
+];
+
+// icon of page
+final List<IconData> _icons = [
+  FontAwesomeIcons.handshake,
+  FontAwesomeIcons.microphone,
+  FontAwesomeIcons.headphones,
+  FontAwesomeIcons.upload,
+  FontAwesomeIcons.rectangleList,
+  FontAwesomeIcons.inbox,
+  FontAwesomeIcons.users
+];
