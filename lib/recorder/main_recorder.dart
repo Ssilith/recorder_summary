@@ -29,7 +29,6 @@ class _MainRecorderState extends State<MainRecorder> {
 
   // paths
   String? path;
-  String? musicFile;
   late Directory appDirectory;
 
   // record state management
@@ -124,7 +123,7 @@ class _MainRecorderState extends State<MainRecorder> {
     playerController?.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.stopped && mounted) {
         setState(() {
-          recordingState = RecordingState.idle;
+          recordingState = RecordingState.finished;
         });
       }
     });

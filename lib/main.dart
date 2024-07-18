@@ -13,7 +13,7 @@ import 'package:recorder_summary/providers/auth_provider.dart';
 import 'package:recorder_summary/recorder/main_recorder.dart';
 import 'package:recorder_summary/side_drawer.dart';
 import 'package:recorder_summary/summary/main_summary.dart';
-import 'package:recorder_summary/upload/main_upload.dart';
+import 'package:recorder_summary/recordings/main_recordings.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -105,14 +105,14 @@ class _MyHomePageState extends State<MyHomePage> {
   // main pages
   final List<Widget> bottomBarPages = [
     const MainRecorder(),
-    const MainUpload(),
+    const MainRecordings(),
     const MainSummary(),
   ];
 
   // icons of navigation
   final List<IconData> _icons = [
     FontAwesomeIcons.microphone,
-    FontAwesomeIcons.upload,
+    FontAwesomeIcons.headphones,
     FontAwesomeIcons.inbox,
   ];
 

@@ -1,44 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:recorder_summary/app_bar_scaffold.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ContactUs extends StatefulWidget {
+class ContactUs extends StatelessWidget {
   const ContactUs({super.key});
-
-  @override
-  State<ContactUs> createState() => _ContactUsState();
-}
-
-class _ContactUsState extends State<ContactUs> {
-  // title of container
-  final List<String> _titles = [
-    'Phone number',
-    'Email',
-    'LinkedIn',
-  ];
-
-  // description of container
-  final List<String> _descriptions = [
-    '+48 739 971 584',
-    'k.hajduk.wroclaw@gmail.com',
-    'Katarzyna Hajduk',
-  ];
-
-  // icons of container
-  final List<IconData> _icons = [
-    Icons.call,
-    Icons.mail,
-    FontAwesomeIcons.linkedin,
-  ];
-
-  // container urls
-  final List<String> _urls = [
-    'tel:+48739971584',
-    'mailto:k.hajduk.wroclaw@gmail.com',
-    'https://www.linkedin.com/in/katarzyna-hajduk-73b78026b/'
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -48,91 +16,122 @@ class _ContactUsState extends State<ContactUs> {
             itemCount: _titles.length,
             shrinkWrap: true,
             itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                  child: ContactContainer(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ContactBox(
                       title: _titles[index],
-                      icon: _icons[index],
                       description: _descriptions[index],
+                      iconData: _icons[index],
+                      buttonTitle: _buttonTitles[index],
                       url: _urls[index]),
                 )));
   }
 }
 
-class ContactContainer extends StatelessWidget {
-  final IconData icon;
+class ContactBox extends StatelessWidget {
   final String title;
   final String description;
+  final IconData iconData;
   final String url;
-  const ContactContainer(
+  final String buttonTitle;
+  const ContactBox(
       {super.key,
-      required this.icon,
       required this.title,
       required this.description,
-      required this.url});
+      required this.iconData,
+      required this.url,
+      required this.buttonTitle});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-        child: Container(
-          padding: const EdgeInsets.all(10),
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Container(
+          height: 150,
+          margin: const EdgeInsets.only(top: 40),
+          padding: const EdgeInsets.only(top: 45),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onInverseSurface,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
+            color:
+                Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 38.0,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 3),
-                      VerticalDivider(
-                        thickness: 1,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            description,
-                            style: TextStyle(
-                                color: Theme.of(context).hintColor,
-                                fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
-                  ),
-                ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
-            ),
+              const SizedBox(height: 5),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const Spacer(),
+              Padding(
+                padding: EdgeInsets.zero,
+                child: InkWell(
+                  onTap: () async {
+                    if (url != "") {
+                      _launchUrl(url);
+                    } else {
+                      message(context, "Failure", "Cannot launch url");
+                    }
+                  },
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(12),
+                            bottomRight: Radius.circular(12)),
+                        color: Theme.of(context).colorScheme.primary),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          buttonTitle,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).scaffoldBackgroundColor),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(MdiIcons.arrowRight,
+                            size: 21,
+                            weight: 100,
+                            color: Theme.of(context).scaffoldBackgroundColor)
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
           ),
         ),
-        onTap: () async {
-          if (url != "") {
-            _launchUrl(url);
-          } else {
-            message(context, "Failure", "Cannot launch url");
-          }
-        });
+        // Icon
+        Positioned(
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(iconData,
+                size: 40, color: Theme.of(context).scaffoldBackgroundColor),
+          ),
+        ),
+      ],
+    );
   }
 
   // launch url
@@ -143,3 +142,38 @@ class ContactContainer extends StatelessWidget {
     }
   }
 }
+
+// title of container
+final List<String> _titles = [
+  'Phone number',
+  'Email',
+  'LinkedIn',
+];
+
+// description of container
+final List<String> _descriptions = [
+  '+48 739 971 584',
+  'k.hajduk.wroclaw@gmail.com',
+  'Katarzyna Hajduk',
+];
+
+// icons of container
+final List<IconData> _icons = [
+  Icons.call,
+  Icons.mail,
+  FontAwesomeIcons.linkedin,
+];
+
+// container urls
+final List<String> _urls = [
+  'tel:+48739971584',
+  'mailto:k.hajduk.wroclaw@gmail.com',
+  'https://www.linkedin.com/in/katarzyna-hajduk-73b78026b/'
+];
+
+// button title
+final List<String> _buttonTitles = [
+  'Call',
+  'Email',
+  'Check',
+];
