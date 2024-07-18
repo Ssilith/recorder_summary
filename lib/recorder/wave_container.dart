@@ -4,7 +4,7 @@ import 'package:recorder_summary/side_drawer.dart';
 
 class WaveContainer extends StatelessWidget {
   final bool isPlayer;
-  final PlayerController playerController;
+  final PlayerController? playerController;
   final RecorderController recorderController;
   const WaveContainer(
       {super.key,
@@ -19,19 +19,26 @@ class WaveContainer extends StatelessWidget {
       SizedBox(
         height: 120,
         child: isPlayer
-            ? AudioFileWaveforms(
-                enableSeekGesture: true,
-                size: Size(size.width, 120),
-                playerController: playerController,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                margin: const EdgeInsets.symmetric(horizontal: 15),
-                playerWaveStyle: PlayerWaveStyle(
-                  showSeekLine: true,
-                  seekLineColor: Colors.white,
-                  liveWaveColor: Theme.of(context).colorScheme.primary,
-                ),
-              )
+            ? playerController != null
+                ? AudioFileWaveforms(
+                    enableSeekGesture: true,
+                    size: Size(size.width, 120),
+                    playerController: playerController!,
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
+                    playerWaveStyle: PlayerWaveStyle(
+                      showSeekLine: true,
+                      seekLineColor: Colors.white,
+                      liveWaveColor: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : Container(
+                    width: size.width,
+                    height: 120,
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                  )
             : AudioWaveforms(
                 enableGesture: true,
                 shouldCalculateScrolledPosition: true,

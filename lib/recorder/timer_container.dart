@@ -5,7 +5,7 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 class TimerContainer extends StatefulWidget {
   final bool isPlayer;
   final RecorderController recorderController;
-  final PlayerController playerController;
+  final PlayerController? playerController;
   const TimerContainer(
       {super.key,
       required this.recorderController,
@@ -24,14 +24,16 @@ class _TimerContainerState extends State<TimerContainer> {
   void initState() {
     super.initState();
     if (!widget.isPlayer) {
-      _setRecordControllerDuretion();
+      _setRecordControllerDuration();
     }
   }
 
-  _setRecordControllerDuretion() {
+  _setRecordControllerDuration() {
     // update timer every 50 ms
     timer = Timer.periodic(const Duration(milliseconds: 50), (Timer t) {
-      setState(() => duration = widget.recorderController.elapsedDuration);
+      if (mounted) {
+        setState(() => duration = widget.recorderController.elapsedDuration);
+      }
     });
   }
 
@@ -45,19 +47,21 @@ class _TimerContainerState extends State<TimerContainer> {
   Widget build(BuildContext context) {
     return widget.isPlayer
         ? StreamBuilder(
-            stream: widget.playerController.onCurrentDurationChanged,
+            stream: widget.playerController?.onCurrentDurationChanged,
             builder: (context, snapshot) {
               final duration = Duration(milliseconds: snapshot.data ?? 0);
-              return Container(
-                padding: const EdgeInsets.all(8),
-                child: buildStyledTimerText(duration),
-              );
+              return buildContainer(duration);
             },
           )
-        : Container(
-            padding: const EdgeInsets.all(8),
-            child: buildStyledTimerText(duration),
-          );
+        : buildContainer(duration);
+  }
+
+  // container style
+  Widget buildContainer(Duration duration) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      child: buildStyledTimerText(duration),
+    );
   }
 
   formatToTwoDigits(int duration) {

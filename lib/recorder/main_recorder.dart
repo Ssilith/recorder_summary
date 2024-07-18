@@ -24,7 +24,7 @@ class MainRecorder extends StatefulWidget {
 class _MainRecorderState extends State<MainRecorder> {
   // controllers
   late final RecorderController recorderController;
-  PlayerController playerController = PlayerController();
+  PlayerController? playerController;
   TextEditingController renameController = TextEditingController();
 
   // paths
@@ -65,6 +65,9 @@ class _MainRecorderState extends State<MainRecorder> {
   _startRecording() async {
     if (recordingState != RecordingState.recording) {
       try {
+        // stop the player
+        await playerController?.stopPlayer();
+        // start recording
         await recorderController.record();
         setState(() => recordingState = RecordingState.recording);
       } catch (e) {
@@ -112,6 +115,21 @@ class _MainRecorderState extends State<MainRecorder> {
     }
   }
 
+  // prepare player and add listener to change recording state
+  _initialisePlayerController() async {
+    playerController = PlayerController();
+    await playerController?.preparePlayer(
+        path: path!, shouldExtractWaveform: true);
+
+    playerController?.onPlayerStateChanged.listen((state) {
+      if (state == PlayerState.stopped && mounted) {
+        setState(() {
+          recordingState = RecordingState.idle;
+        });
+      }
+    });
+  }
+
   // handle file renaming and checks for file existence
   _handleRecordingCompletion() async {
     // ensure the recorded file exists
@@ -146,7 +164,9 @@ class _MainRecorderState extends State<MainRecorder> {
           try {
             await File(path!).rename(newPath);
             path = newPath;
-            isNameCorrect = true;
+            setState(() {
+              isNameCorrect = true;
+            });
           } catch (e) {
             message(context, "Error", "Failed to rename file");
             break;
@@ -158,8 +178,7 @@ class _MainRecorderState extends State<MainRecorder> {
     // if renaming was successful prepare the player
     if (isNameCorrect) {
       try {
-        await playerController.preparePlayer(
-            path: path!, shouldExtractWaveform: true);
+        _initialisePlayerController();
       } catch (e) {
         message(context, "Failure", "Error preparing player");
       }
@@ -171,15 +190,19 @@ class _MainRecorderState extends State<MainRecorder> {
     try {
       if (recordingState == RecordingState.finished ||
           recordingState == RecordingState.playing) {
-        if (playerController.playerState.isPlaying) {
-          // pause the player
-          await playerController.pausePlayer();
-          setState(() => recordingState = RecordingState.finished);
-        } else {
-          // start the player
-          await playerController.startPlayer();
-          setState(() => recordingState = RecordingState.playing);
+        if (playerController != null) {
+          if (playerController!.playerState.isPlaying) {
+            // pause the player
+            await playerController?.pausePlayer();
+            setState(() => recordingState = RecordingState.finished);
+          } else {
+            // start the player
+            await playerController?.startPlayer();
+            setState(() => recordingState = RecordingState.playing);
+          }
         }
+      } else {
+        message(context, "Failure", "Error in preparing player");
       }
     } catch (e) {
       message(context, "Failure", "Error in handling recording");
@@ -191,15 +214,14 @@ class _MainRecorderState extends State<MainRecorder> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result != null) {
-        await playerController.release();
         try {
-          musicFile = result.files.single.path;
-          await playerController.preparePlayer(
-              path: musicFile!, shouldExtractWaveform: true);
+          setState(() {
+            path = result.files.single.path;
+          });
+          _initialisePlayerController();
           setState(() => recordingState = RecordingState.finished);
         } catch (e) {
           setState(() => recordingState = RecordingState.idle);
-
           message(context, "Failure", "An error occured");
         }
       } else {
@@ -213,8 +235,8 @@ class _MainRecorderState extends State<MainRecorder> {
   @override
   void dispose() {
     recorderController.dispose();
-    playerController.release();
-    playerController.dispose();
+    playerController?.release();
+    playerController?.dispose();
     super.dispose();
   }
 
@@ -287,13 +309,16 @@ class _MainRecorderState extends State<MainRecorder> {
                       recordingState == RecordingState.paused)
                     IconButton(
                         icon: const Icon(Icons.stop), onPressed: _stopRecording)
-                  else
+                  else if (recordingState == RecordingState.finished ||
+                      recordingState == RecordingState.playing)
                     IconButton(
                         icon: Icon(recordingState == RecordingState.finished &&
                                 recordingState != RecordingState.playing
                             ? Icons.play_arrow
                             : Icons.pause),
                         onPressed: _startOrStopPlayer)
+                  else
+                    const SizedBox(width: 50),
                 ],
               ),
             ],
