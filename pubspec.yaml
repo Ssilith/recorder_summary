@@ -43,8 +43,9 @@ dependencies:
   # bottom navigation
   animated_notch_bottom_bar: ^1.0.3
 
-  # record
+  # record and play
   audio_waveforms: ^1.0.5
+  just_audio: ^0.9.39
 
   # permission
   permission_handler: ^11.3.1
@@ -53,6 +54,12 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.3
   file_picker: ^8.0.3
+
+  # dates
+  intl: ^0.19.0
+
+  # slider
+  flutter_slidable: ^3.1.1
   
 
 dev_dependencies:

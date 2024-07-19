@@ -64,10 +64,6 @@ class _TimerContainerState extends State<TimerContainer> {
     );
   }
 
-  formatToTwoDigits(int duration) {
-    return duration.toString().padLeft(2, '0');
-  }
-
   Widget buildStyledTimerText(Duration duration) {
     // format the duration to show minutes, seconds, and fraction of miliseconds
     final minutes = formatToTwoDigits(duration.inMinutes.remainder(60));
@@ -124,4 +120,8 @@ class _TimerContainerState extends State<TimerContainer> {
       text: TextSpan(children: spans),
     );
   }
+}
+
+formatToTwoDigits(int duration) {
+  return duration.toString().padLeft(2, '0');
 }
