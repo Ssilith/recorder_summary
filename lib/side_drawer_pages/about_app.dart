@@ -103,8 +103,8 @@ final List<String> _descriptions = [
   'Attend meetings, lectures, or conversations and easily record the audio with our built-in dictaphone.',
   'Listen to your recorded content anytime, ensuring you never miss important details.',
   'Upload your recordings directly through the app with just a few taps.',
-  'Once submitted, our advanced technology processes your recording and creates a concise summary.',
-  'Receive a clear and informative summary directly in your email, ready to review and refer back to whenever needed.',
+  'Once submitted, we process your recording and create a concise summary.',
+  'Receive a clear and informative summary directly in the app, ready for review and reference whenever needed.',
   'Whether you\'re a professional looking to streamline meeting notes or a student wanting to capture lecture points, our app is your perfect companion.',
 ];
 
