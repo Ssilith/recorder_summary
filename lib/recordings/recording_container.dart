@@ -18,11 +18,13 @@ class RecordingContainer extends StatefulWidget {
   final AudioRecording recording;
   final Directory appDirectory;
   final VoidCallback onDelete;
+  final VoidCallback onEdit;
   const RecordingContainer({
     super.key,
     required this.recording,
     required this.appDirectory,
     required this.onDelete,
+    required this.onEdit,
   });
 
   @override
@@ -41,7 +43,6 @@ class _RecordingContainerState extends State<RecordingContainer> {
 
   @override
   void initState() {
-    renameController.text = widget.recording.fileName.split('.').first;
     isPlaying = widget.recording.player.playing;
     formattedTime = _parseDurationToString(widget.recording.duration);
     formattedDate = _formatDate(widget.recording.creationDate);
@@ -57,6 +58,7 @@ class _RecordingContainerState extends State<RecordingContainer> {
 
   // show edit recording dialog
   _showRenameDialog() {
+    renameController.text = widget.recording.fileName.split('.').first;
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -73,7 +75,6 @@ class _RecordingContainerState extends State<RecordingContainer> {
               String newPath = p.join(
                   widget.appDirectory.path, "${renameController.text}.m4a");
               File newFile = await widget.recording.file.rename(newPath);
-              widget.recording.file.rename(newPath);
               setState(() {
                 widget.recording.file = newFile;
                 widget.recording.fileName = "${renameController.text}.m4a";
@@ -81,6 +82,7 @@ class _RecordingContainerState extends State<RecordingContainer> {
               Navigator.of(context).pop();
               message(context, 'Success', 'Name changed successfully',
                   SnackbarType.success);
+              widget.onEdit();
             }
           },
           icon: const Icon(Icons.text_format_rounded),

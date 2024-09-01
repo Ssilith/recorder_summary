@@ -287,6 +287,7 @@ class _MainRecorderState extends State<MainRecorder> {
                   ),
                   // wave
                   WaveContainer(
+                    key: UniqueKey(),
                     isPlayer: (recordingState == RecordingState.finished ||
                         recordingState == RecordingState.playing),
                     playerController: playerController,

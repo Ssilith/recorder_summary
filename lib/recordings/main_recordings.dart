@@ -146,6 +146,14 @@ class _MainRecordingsState extends State<MainRecordings> {
                         .map((recording) => RecordingContainer(
                             recording: recording,
                             appDirectory: appDirectory!,
+                            onEdit: () {
+                              setState(() {
+                                // clear search
+                                searchString = "";
+                                searchController.text = "";
+                                searchController.clear();
+                              });
+                            },
                             onDelete: () {
                               setState(() {
                                 // clear search
