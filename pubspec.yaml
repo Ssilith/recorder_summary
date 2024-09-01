@@ -60,6 +60,9 @@ dependencies:
 
   # slider
   flutter_slidable: ^3.1.1
+
+  # indicator
+  loading_animation_widget: ^1.2.1
   
 
 dev_dependencies:

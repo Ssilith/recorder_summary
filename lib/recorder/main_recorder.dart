@@ -4,11 +4,13 @@ import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:recorder_summary/recorder/record_button.dart';
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recorder/wave_container.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
+import 'package:recorder_summary/widgets/indicator.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:path/path.dart' as p;
 
@@ -269,62 +271,85 @@ class _MainRecorderState extends State<MainRecorder> {
   Widget build(BuildContext context) {
     return isLoading
         // loading indicator
-        ? const Center(child: CircularProgressIndicator())
-        : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+        ? const Center(child: Indicator())
+        : Stack(
             children: [
-              // timer
-              TimerContainer(
-                isPlayer: (recordingState == RecordingState.finished ||
-                    recordingState == RecordingState.playing),
-                recorderController: recorderController,
-                playerController: playerController,
-              ),
-              // wave
-              WaveContainer(
-                isPlayer: (recordingState == RecordingState.finished ||
-                    recordingState == RecordingState.playing),
-                playerController: playerController,
-                recorderController: recorderController,
-              ),
-              // buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // choose file
-                  IconButton(
-                    icon: const Icon(Icons.file_upload_outlined),
-                    onPressed: _pickFile,
+                  // timer
+                  TimerContainer(
+                    isPlayer: (recordingState == RecordingState.finished ||
+                        recordingState == RecordingState.playing),
+                    recorderController: recorderController,
+                    playerController: playerController,
                   ),
-                  // record / pause
-                  RecordButton(
-                    recordingState: recordingState,
-                    onPressed: () {
-                      if (recordingState != RecordingState.recording) {
-                        _startRecording();
-                      } else {
-                        _pauseOrContinueRecording();
-                      }
-                    },
+                  // wave
+                  WaveContainer(
+                    isPlayer: (recordingState == RecordingState.finished ||
+                        recordingState == RecordingState.playing),
+                    playerController: playerController,
+                    recorderController: recorderController,
                   ),
-                  // stop / play
-                  if (recordingState == RecordingState.recording ||
-                      recordingState == RecordingState.paused)
-                    IconButton(
-                        icon: const Icon(Icons.stop), onPressed: _stopRecording)
-                  else if (recordingState == RecordingState.finished ||
-                      recordingState == RecordingState.playing)
-                    IconButton(
-                        icon: Icon(recordingState == RecordingState.finished &&
-                                recordingState != RecordingState.playing
-                            ? Icons.play_arrow
-                            : Icons.pause),
-                        onPressed: _startOrStopPlayer)
-                  else
-                    const SizedBox(width: 50),
+                  // buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      // choose file
+                      IconButton(
+                        icon: const Icon(Icons.file_upload_outlined),
+                        onPressed: _pickFile,
+                      ),
+                      // record / pause
+                      RecordButton(
+                        recordingState: recordingState,
+                        onPressed: () {
+                          if (recordingState != RecordingState.recording) {
+                            _startRecording();
+                          } else {
+                            _pauseOrContinueRecording();
+                          }
+                        },
+                      ),
+                      // stop / play
+                      if (recordingState == RecordingState.recording ||
+                          recordingState == RecordingState.paused)
+                        IconButton(
+                            icon: const Icon(Icons.stop),
+                            onPressed: _stopRecording)
+                      else if (recordingState == RecordingState.finished ||
+                          recordingState == RecordingState.playing)
+                        IconButton(
+                            icon: Icon(
+                                recordingState == RecordingState.finished &&
+                                        recordingState != RecordingState.playing
+                                    ? Icons.play_arrow
+                                    : Icons.pause),
+                            onPressed: _startOrStopPlayer)
+                      else
+                        const SizedBox(width: 50),
+                    ],
+                  ),
                 ],
               ),
+              // send to speech-to-text button
+              if (recordingState == RecordingState.finished ||
+                  recordingState == RecordingState.playing)
+                Positioned(
+                  bottom: 0,
+                  right: 15,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      // TODO: send to speech-to-text
+                    },
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: const CircleBorder(),
+                    child: Icon(MdiIcons.fileSendOutline,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        size: 28),
+                  ),
+                ),
             ],
           );
   }

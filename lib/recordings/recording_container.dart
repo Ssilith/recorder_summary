@@ -8,6 +8,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 import 'package:recorder_summary/recordings/play_icon.dart';
+import 'package:recorder_summary/recordings/speed_selector.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/dialogs/my_alert_dialog.dart';
 import 'package:recorder_summary/widgets/message.dart';
@@ -204,8 +205,11 @@ class _RecordingContainerState extends State<RecordingContainer> {
                                           color: Colors.white),
                                     ),
                                   ),
+                                  // send to speech-to-text button
                                   GestureDetector(
-                                      onTap: () {},
+                                      onTap: () {
+                                        // TODO: send to speech-to-text
+                                      },
                                       child: Icon(MdiIcons.fileSendOutline,
                                           size: 22)),
                                 ],
@@ -242,27 +246,36 @@ class _RecordingContainerState extends State<RecordingContainer> {
                     ),
                     if (isExpanded)
                       // slider
-                      StreamBuilder(
-                        stream: widget.recording.player.positionStream,
-                        builder: (context, snapshot) {
-                          final position =
-                              snapshot.data?.inMilliseconds.toDouble() ?? 0;
-                          final totalDuration = widget
-                                  .recording.duration?.inMilliseconds
-                                  .toDouble() ??
-                              0;
-                          return Slider(
-                            min: 0,
-                            max: totalDuration,
-                            value: position < totalDuration
-                                ? position
-                                : totalDuration,
-                            onChanged: (value) {
-                              widget.recording.player
-                                  .seek(Duration(milliseconds: value.round()));
-                            },
-                          );
-                        },
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StreamBuilder(
+                              stream: widget.recording.player.positionStream,
+                              builder: (context, snapshot) {
+                                final position =
+                                    snapshot.data?.inMilliseconds.toDouble() ??
+                                        0;
+                                final totalDuration = widget
+                                        .recording.duration?.inMilliseconds
+                                        .toDouble() ??
+                                    0;
+                                return Slider(
+                                  min: 0,
+                                  max: totalDuration,
+                                  value: position < totalDuration
+                                      ? position
+                                      : totalDuration,
+                                  onChanged: (value) {
+                                    widget.recording.player.seek(
+                                        Duration(milliseconds: value.round()));
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          // change audio speed
+                          SpeedSelector(player: widget.recording.player),
+                        ],
                       ),
                   ],
                 ),

@@ -9,6 +9,7 @@ import 'package:recorder_summary/widgets/buttons/change_text_button.dart';
 import 'package:recorder_summary/widgets/buttons/google_sign_in_button.dart';
 import 'package:recorder_summary/widgets/buttons/round_button.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
+import 'package:recorder_summary/widgets/indicator.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:recorder_summary/widgets/text_inputs/text_divider.dart';
 import 'package:recorder_summary/widgets/text_inputs/text_input_form.dart';
@@ -49,7 +50,8 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () async {
             try {
               await resetPassword(_remindEmail.text);
-              message(context, 'Success', "Email was send successfully");
+              message(context, 'Success', "Email was send successfully",
+                  SnackbarType.success);
             } catch (e) {
               message(context, 'Failure', "Failed to send email");
             }
@@ -171,13 +173,11 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               if (isLoading)
-                SizedBox(
-                  height: 60,
-                  child: Center(
-                      child: CircularProgressIndicator(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                  )),
-                )
+                Center(
+                    child: Indicator(
+                  size: 60,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ))
             ],
           ),
           // forgot password button

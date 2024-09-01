@@ -1,8 +1,12 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:recorder_summary/recordings/recording_container.dart';
+import 'package:recorder_summary/recordings/search_bar_container.dart';
+import 'package:recorder_summary/widgets/indicator.dart';
 
 // recording data class
 class AudioRecording {
@@ -35,7 +39,14 @@ class MainRecordings extends StatefulWidget {
 }
 
 class _MainRecordingsState extends State<MainRecordings> {
+  // search string
+  String searchString = "";
+  TextEditingController searchController = TextEditingController();
+
+  // app directory
   Directory? appDirectory;
+
+  // recordings
   Future? getRecordingList;
   List<AudioRecording> recordingList = [];
 
@@ -86,16 +97,31 @@ class _MainRecordingsState extends State<MainRecordings> {
     }
   }
 
+  // check if is searched and filter returning proper list
+  List<AudioRecording> _getSearchedList() {
+    if (searchString != "") {
+      List<AudioRecording> searchList = [];
+      searchList.addAll(recordingList);
+
+      List<AudioRecording> listData = searchList
+          .where((item) => item.fileName
+              .toString()
+              .toLowerCase()
+              .contains(searchString.toLowerCase()))
+          .toList();
+
+      return listData;
+    }
+    return recordingList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: getRecordingList,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 60,
-            child: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: Indicator());
         } else if (snapshot.hasError) {
           return const Center(
               child: Text('An error occurred. Please try again later.'));
@@ -105,16 +131,37 @@ class _MainRecordingsState extends State<MainRecordings> {
         } else {
           recordingList = snapshot.data;
           // all recordings
-          return ListView.builder(
-              shrinkWrap: true,
-              itemCount: recordingList.length,
-              itemBuilder: (context, index) {
-                return RecordingContainer(
-                  recording: recordingList[index],
-                  appDirectory: appDirectory!,
-                  onDelete: () => setState(() => recordingList.removeAt(index)),
-                );
-              });
+          return Column(
+            children: [
+              // search recordings
+              SearchBarContainer(
+                searchController: searchController,
+                onChanged: (search) => setState(() => searchString = search),
+              ),
+              // recordings list
+              Expanded(
+                child: ListView(
+                    shrinkWrap: true,
+                    children: _getSearchedList()
+                        .map((recording) => RecordingContainer(
+                            recording: recording,
+                            appDirectory: appDirectory!,
+                            onDelete: () {
+                              setState(() {
+                                // clear search
+                                searchString = "";
+                                searchController.text = "";
+                                searchController.clear();
+
+                                // delete recording
+                                _getSearchedList().removeWhere((element) =>
+                                    element.fileName == recording.fileName);
+                              });
+                            }))
+                        .toList()),
+              )
+            ],
+          );
         }
       },
     );
