@@ -16,10 +16,15 @@ import 'package:recorder_summary/summary/main_summary.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 
 void main() async {
+  // initialize app
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // show splash screen
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   FlutterNativeSplash.remove();
+
+  // remove horizontal orientation
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
@@ -31,6 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
+          // create auth provider
           ChangeNotifierProvider(create: (_) => AuthProvider()),
         ],
         builder: (context, _) {
@@ -39,18 +45,11 @@ class MyApp extends StatelessWidget {
             title: 'Recorder Summary',
             themeMode: ThemeMode.dark,
             theme: ThemeData(
-                brightness: Brightness.light,
-                useMaterial3: true,
-                colorSchemeSeed: Colors.indigo,
-                fontFamily: 'Poppins',
-                appBarTheme: const AppBarTheme(
-                  centerTitle: true,
-                  elevation: 0,
-                  titleTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w600),
-                )),
+              brightness: Brightness.light,
+              useMaterial3: true,
+              colorSchemeSeed: Colors.indigo,
+              fontFamily: 'Poppins',
+            ),
             darkTheme: ThemeData(
               scaffoldBackgroundColor: const Color(0xFF180e2c),
               dialogBackgroundColor: const Color(0xFF180e2c),
@@ -88,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // pages controller
   final _pageController = PageController(initialPage: 0);
 
-  // bottom navigation bar controlles
+  // bottom navigation bar controller
   final NotchBottomBarController _controller =
       NotchBottomBarController(index: 0);
 
@@ -101,13 +100,6 @@ class _MyHomePageState extends State<MyHomePage> {
   _closeDrawer() {
     scaffoldKey.currentState?.closeDrawer();
   }
-
-  // main pages
-  final List<Widget> bottomBarPages = [
-    const MainRecorder(),
-    const MainRecordings(),
-    const MainSummary(),
-  ];
 
   // icons of navigation
   final List<IconData> _icons = [
@@ -124,8 +116,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // main pages
+    final List<Widget> bottomBarPages = [
+      const MainRecorder(),
+      const MainRecordings(),
+      const MainSummary(),
+    ];
+
     return Scaffold(
       key: scaffoldKey,
+      // app ber
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Recorder summary"),
@@ -135,16 +135,19 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         backgroundColor: Theme.of(context).colorScheme.onSecondary,
       ),
+      // side drawer
       drawer: SideDrawer(
         authProvider: widget.authProvider,
         onClose: _closeDrawer,
       ),
+      // pages
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: List.generate(
             bottomBarPages.length, (index) => bottomBarPages[index]),
       ),
+      // bottom bar
       bottomNavigationBar: AnimatedNotchBottomBar(
           notchBottomBarController: _controller,
           kBottomRadius: 28.0,

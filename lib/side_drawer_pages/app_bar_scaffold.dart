@@ -7,6 +7,7 @@ class AppBarScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // about us and contact us app bar decoration
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(

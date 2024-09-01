@@ -12,6 +12,7 @@ class PlayIcon extends StatefulWidget {
 class _PlayIconState extends State<PlayIcon> {
   @override
   Widget build(BuildContext context) {
+    // play recording button decoration
     return GestureDetector(
       onTap: widget.onTap,
       child: Stack(

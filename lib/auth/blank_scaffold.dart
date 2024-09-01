@@ -12,6 +12,7 @@ class BlankScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // scaffold decoration
     return Scaffold(
         floatingActionButton: floatingActionButton,
         body: Stack(children: [

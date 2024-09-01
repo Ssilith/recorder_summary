@@ -2,9 +2,11 @@ import 'package:elegant_notification/elegant_notification.dart';
 import 'package:elegant_notification/resources/arrays.dart';
 import 'package:flutter/material.dart';
 
+enum SnackbarType { success, failure, help }
+
 // snackbar
 message(BuildContext context, String title, String description,
-    [String type = 'failure']) {
+    [SnackbarType type = SnackbarType.failure]) {
   Function function = parseContentType(type);
   function(
           position: Alignment.bottomCenter,
@@ -19,13 +21,14 @@ message(BuildContext context, String title, String description,
       .show(context);
 }
 
-Function parseContentType(String type) {
-  switch (type.toLowerCase()) {
-    case 'success':
+// parse enum to ElegantNotification
+Function parseContentType(SnackbarType type) {
+  switch (type) {
+    case SnackbarType.success:
       return ElegantNotification.success;
-    case 'failure':
+    case SnackbarType.failure:
       return ElegantNotification.error;
-    case 'help':
+    case SnackbarType.help:
       return ElegantNotification.info;
     default:
       return ElegantNotification.error;

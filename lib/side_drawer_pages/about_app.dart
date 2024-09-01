@@ -1,7 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:recorder_summary/app_bar_scaffold.dart';
+import 'package:recorder_summary/side_drawer_pages/app_bar_scaffold.dart';
 
 class AboutApp extends StatefulWidget {
   const AboutApp({super.key});
@@ -29,13 +29,16 @@ class _AboutAppState extends State<AboutApp> {
                       Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // icon
                   Icon(_icons[itemIndex], size: 150),
                   const SizedBox(height: 30),
+                  // title
                   Text(_titles[itemIndex],
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary)),
+                  // description
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(_descriptions[itemIndex],
@@ -55,6 +58,7 @@ class _AboutAppState extends State<AboutApp> {
                   }),
             ),
           ),
+          // pages dots
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Row(

@@ -32,7 +32,7 @@ class _SingUpPageState extends State<SingUpPage> {
     await widget.authProvider.signUp(email, password);
     Navigator.of(context).pop();
     message(context, 'Success', "The account has been successfully created",
-        'success');
+        SnackbarType.success);
   }
 
   @override
@@ -43,6 +43,7 @@ class _SingUpPageState extends State<SingUpPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
+          // image
           if (MediaQuery.of(context).viewInsets.bottom == 0)
             SizedBox(
                 height: 250,
@@ -65,12 +66,14 @@ class _SingUpPageState extends State<SingUpPage> {
                 Text("Please fill in the fields below.",
                     style: TextStyle(color: Theme.of(context).hintColor)),
                 const SizedBox(height: 15),
+                // email input
                 TextInputForm(
                   width: size.width * 0.9,
                   hint: "Email",
                   controller: _email,
                   prefixIcon: const Icon(Icons.email),
                 ),
+                // password input
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     child: TextInputForm(
@@ -80,6 +83,7 @@ class _SingUpPageState extends State<SingUpPage> {
                       controller: _password,
                       prefixIcon: const Icon(Icons.lock),
                     )),
+                // repeat password input
                 TextInputForm(
                   width: size.width * 0.9,
                   hint: "Repeat password",
@@ -91,6 +95,7 @@ class _SingUpPageState extends State<SingUpPage> {
             ),
           ),
           const SizedBox(height: 20),
+          // sign up button
           RoundButton(
             height: 60,
             onPressed: () async {
@@ -104,6 +109,7 @@ class _SingUpPageState extends State<SingUpPage> {
             textColor: Theme.of(context).scaffoldBackgroundColor,
           ),
           const Spacer(),
+          // log in button
           ChangeTextButton(
             text: "Have an account?",
             buttonTitle: "Log in",

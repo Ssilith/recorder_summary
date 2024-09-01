@@ -41,7 +41,7 @@ class _MainRecorderState extends State<MainRecorder> {
   void initState() {
     super.initState();
     _getDirectory();
-    _initialiseControllers();
+    _initializeControllers();
   }
 
   // retrieve the directory for output path
@@ -52,7 +52,7 @@ class _MainRecorderState extends State<MainRecorder> {
   }
 
   // initialize controller settings
-  _initialiseControllers() {
+  _initializeControllers() {
     recorderController = RecorderController()
       ..androidEncoder = AndroidEncoder.aac
       ..androidOutputFormat = AndroidOutputFormat.mpeg4
@@ -115,7 +115,7 @@ class _MainRecorderState extends State<MainRecorder> {
   }
 
   // prepare player and add listener to change recording state
-  _initialisePlayerController() async {
+  _initializePlayerController() async {
     playerController = PlayerController();
     await playerController?.preparePlayer(
         path: path!, shouldExtractWaveform: true);
@@ -177,7 +177,7 @@ class _MainRecorderState extends State<MainRecorder> {
     // if renaming was successful prepare the player
     if (isNameCorrect) {
       try {
-        _initialisePlayerController();
+        _initializePlayerController();
       } catch (e) {
         message(context, "Failure", "Error preparing player");
       }
@@ -217,11 +217,11 @@ class _MainRecorderState extends State<MainRecorder> {
           setState(() {
             path = result.files.single.path;
           });
-          _initialisePlayerController();
+          _initializePlayerController();
           setState(() => recordingState = RecordingState.finished);
         } catch (e) {
           setState(() => recordingState = RecordingState.idle);
-          message(context, "Failure", "An error occured");
+          message(context, "Failure", "An error occurred");
         }
       } else {
         message(context, "Failure", "File not picked");
@@ -268,32 +268,36 @@ class _MainRecorderState extends State<MainRecorder> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
+        // loading indicator
+        ? const Center(child: CircularProgressIndicator())
         : Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // timer
               TimerContainer(
                 isPlayer: (recordingState == RecordingState.finished ||
                     recordingState == RecordingState.playing),
                 recorderController: recorderController,
                 playerController: playerController,
               ),
+              // wave
               WaveContainer(
                 isPlayer: (recordingState == RecordingState.finished ||
                     recordingState == RecordingState.playing),
                 playerController: playerController,
                 recorderController: recorderController,
               ),
+              // buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  // choose file
                   IconButton(
                     icon: const Icon(Icons.file_upload_outlined),
                     onPressed: _pickFile,
                   ),
+                  // record / pause
                   RecordButton(
                     recordingState: recordingState,
                     onPressed: () {
@@ -304,6 +308,7 @@ class _MainRecorderState extends State<MainRecorder> {
                       }
                     },
                   ),
+                  // stop / play
                   if (recordingState == RecordingState.recording ||
                       recordingState == RecordingState.paused)
                     IconButton(

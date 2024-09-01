@@ -15,11 +15,13 @@ class WaveContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    // wave decoration
     return ChangeBackgroundColor(children: [
       SizedBox(
         height: 120,
         child: isPlayer
             ? playerController != null
+                // player wave decoration
                 ? AudioFileWaveforms(
                     enableSeekGesture: true,
                     size: Size(size.width, 120),
@@ -39,6 +41,7 @@ class WaveContainer extends StatelessWidget {
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   )
+            // record wave decoration
             : AudioWaveforms(
                 enableGesture: true,
                 shouldCalculateScrolledPosition: true,

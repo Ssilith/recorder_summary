@@ -8,6 +8,7 @@ class AuthPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // auth page decoration
     return BlankScaffold(
       showLeading: showLeading,
       body: LayoutBuilder(builder: (context, constraint) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:recorder_summary/app_bar_scaffold.dart';
+import 'package:recorder_summary/side_drawer_pages/app_bar_scaffold.dart';
 import 'package:recorder_summary/widgets/message.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -60,6 +60,7 @@ class ContactBox extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // title
               Text(
                 title,
                 style: const TextStyle(
@@ -68,6 +69,7 @@ class ContactBox extends StatelessWidget {
                     color: Colors.white),
               ),
               const SizedBox(height: 5),
+              // description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
@@ -77,6 +79,7 @@ class ContactBox extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              // bottom bar
               Padding(
                 padding: EdgeInsets.zero,
                 child: InkWell(
@@ -117,7 +120,7 @@ class ContactBox extends StatelessWidget {
             ],
           ),
         ),
-        // Icon
+        // icon
         Positioned(
           child: Container(
             width: 80,

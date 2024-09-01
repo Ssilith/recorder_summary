@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 import 'package:recorder_summary/recordings/play_icon.dart';
@@ -77,8 +78,8 @@ class _RecordingContainerState extends State<RecordingContainer> {
                 widget.recording.fileName = "${renameController.text}.m4a";
               });
               Navigator.of(context).pop();
-              message(
-                  context, 'Success', 'Name changed successfully', 'success');
+              message(context, 'Success', 'Name changed successfully',
+                  SnackbarType.success);
             }
           },
           icon: const Icon(Icons.text_format_rounded),
@@ -100,8 +101,11 @@ class _RecordingContainerState extends State<RecordingContainer> {
             onPressed: () async {
               await widget.recording.file.delete();
               Navigator.of(context).pop();
-              message(context, 'Success',
-                  "The recording has been successfully deleted", 'success');
+              message(
+                  context,
+                  'Success',
+                  "The recording has been successfully deleted",
+                  SnackbarType.success);
               widget.onDelete();
             },
           );
@@ -116,6 +120,7 @@ class _RecordingContainerState extends State<RecordingContainer> {
         startActionPane: ActionPane(
           motion: const StretchMotion(),
           children: [
+            // edit button
             IconTheme(
               data: IconTheme.of(context)
                   .copyWith(color: Theme.of(context).focusColor),
@@ -129,6 +134,7 @@ class _RecordingContainerState extends State<RecordingContainer> {
                   icon: Icons.edit,
                   label: "Edit"),
             ),
+            // delete button
             IconTheme(
               data: IconTheme.of(context)
                   .copyWith(color: Theme.of(context).focusColor),
@@ -144,99 +150,122 @@ class _RecordingContainerState extends State<RecordingContainer> {
             ),
           ],
         ),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color:
-                Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-          ),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: isExpanded ? 105 : 65,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      PlayIcon(
-                        key: ValueKey(isPlaying),
-                        isPlaying: isPlaying,
-                        onTap: () async {
-                          setState(() => isPlaying = !isPlaying);
-                          if (widget.recording.player.playing) {
-                            await widget.recording.player.pause();
-                          } else {
-                            setState(() => isExpanded = true);
-                            await widget.recording.player.play();
-                          }
+        child: GestureDetector(
+          // hide slider
+          onTap: () => setState(() => isExpanded = false),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color:
+                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            ),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: isExpanded ? 105 : 65,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        // play / stop button
+                        PlayIcon(
+                          key: ValueKey(isPlaying),
+                          isPlaying: isPlaying,
+                          onTap: () async {
+                            setState(() => isPlaying = !isPlaying);
+                            if (widget.recording.player.playing) {
+                              await widget.recording.player.pause();
+                            } else {
+                              setState(() => isExpanded = true);
+                              await widget.recording.player.play();
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // file name
+                                  Expanded(
+                                    child: Text(
+                                      widget.recording.fileName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                      onTap: () {},
+                                      child: Icon(MdiIcons.fileSendOutline,
+                                          size: 22)),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // time
+                                  Expanded(
+                                    child: formattedTime != null
+                                        ? Text(
+                                            formattedTime!,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.start,
+                                            style:
+                                                const TextStyle(fontSize: 16),
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                  // date
+                                  Text(
+                                    formattedDate,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (isExpanded)
+                      // slider
+                      StreamBuilder(
+                        stream: widget.recording.player.positionStream,
+                        builder: (context, snapshot) {
+                          final position =
+                              snapshot.data?.inMilliseconds.toDouble() ?? 0;
+                          final totalDuration = widget
+                                  .recording.duration?.inMilliseconds
+                                  .toDouble() ??
+                              0;
+                          return Slider(
+                            min: 0,
+                            max: totalDuration,
+                            value: position < totalDuration
+                                ? position
+                                : totalDuration,
+                            onChanged: (value) {
+                              widget.recording.player
+                                  .seek(Duration(milliseconds: value.round()));
+                            },
+                          );
                         },
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.recording.fileName,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: formattedTime != null
-                                      ? Text(
-                                          formattedTime!,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.start,
-                                          style: const TextStyle(fontSize: 16),
-                                        )
-                                      : const SizedBox(),
-                                ),
-                                Text(
-                                  formattedDate,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (isExpanded)
-                    StreamBuilder(
-                      stream: widget.recording.player.positionStream,
-                      builder: (context, snapshot) {
-                        final position =
-                            snapshot.data?.inMilliseconds.toDouble() ?? 0;
-                        final totalDuration = widget
-                                .recording.duration?.inMilliseconds
-                                .toDouble() ??
-                            0;
-                        return Slider(
-                          min: 0,
-                          max: totalDuration,
-                          value: position < totalDuration
-                              ? position
-                              : totalDuration,
-                          onChanged: (value) {
-                            widget.recording.player
-                                .seek(Duration(milliseconds: value.round()));
-                          },
-                        );
-                      },
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -246,7 +275,7 @@ class _RecordingContainerState extends State<RecordingContainer> {
   }
 }
 
-// parse duration to string MM:SS:MSMS
+// parse duration to string MM:SS:MS
 _parseDurationToString(Duration? duration) {
   var minutes = formatToTwoDigits(duration!.inMinutes.remainder(60));
   var seconds = formatToTwoDigits(duration.inSeconds.remainder(60));
@@ -255,7 +284,7 @@ _parseDurationToString(Duration? duration) {
   return "$minutes:$seconds.$milliseconds";
 }
 
-// parse datetime to string dd MMM yyyy
+// parse date-time to string dd MMM yyyy
 _formatDate(DateTime date) {
   final DateFormat formatter = DateFormat('dd MMM yyyy');
   return formatter.format(date);

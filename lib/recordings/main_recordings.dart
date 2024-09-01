@@ -98,12 +98,13 @@ class _MainRecordingsState extends State<MainRecordings> {
           );
         } else if (snapshot.hasError) {
           return const Center(
-              child: Text('An error occured. Please try again later.'));
+              child: Text('An error occurred. Please try again later.'));
         } else if (snapshot.data!.isEmpty) {
           recordingList = [];
           return const Center(child: Text('No recordings found.'));
         } else {
           recordingList = snapshot.data;
+          // all recordings
           return ListView.builder(
               shrinkWrap: true,
               itemCount: recordingList.length,

@@ -141,7 +141,7 @@ class AuthProvider extends ChangeNotifier {
     return {};
   }
 
-  // try loggong in with stored credential
+  // try logging in with stored credential
   Future autoLogin() async {
     var credentials = await getUserCredentials();
     bool? rememberMe = await secureStorage.read(key: 'rememberMe') == 'true';

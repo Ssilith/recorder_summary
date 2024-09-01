@@ -26,8 +26,11 @@ class SideDrawer extends StatelessWidget {
             onPressed: () async {
               await authProvider.signOut();
               Navigator.of(context).pop();
-              message(context, 'Success',
-                  "You have been successfully logged out", 'success');
+              message(
+                  context,
+                  'Success',
+                  "You have been successfully logged out",
+                  SnackbarType.success);
             },
           );
         });
@@ -47,8 +50,11 @@ class SideDrawer extends StatelessWidget {
               Navigator.of(context).pop();
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => LoginPage(authProvider: authProvider)));
-              message(context, 'Success',
-                  "The account has been successfully deleted", 'success');
+              message(
+                  context,
+                  'Success',
+                  "The account has been successfully deleted",
+                  SnackbarType.success);
             },
           );
         });
@@ -59,11 +65,14 @@ class SideDrawer extends StatelessWidget {
     return Drawer(
         child: SingleChildScrollView(
             child: Column(children: [
-      const SizedBox(height: 20),
-      const SizedBox(
-          height: 150,
-          child: Center(child: Image(image: AssetImage("assets/logo.png")))),
-      const SizedBox(height: 5),
+      // logo
+      const Padding(
+        padding: EdgeInsets.only(top: 20, bottom: 5),
+        child: SizedBox(
+            height: 150,
+            child: Center(child: Image(image: AssetImage("assets/logo.png")))),
+      ),
+      // user email
       Text(
         authProvider.user!.email!,
         textAlign: TextAlign.center,
@@ -72,10 +81,12 @@ class SideDrawer extends StatelessWidget {
       const SizedBox(height: 15),
       ChangeBackgroundColor(
         children: [
+          // logout button
           DrawerTile(
               onTap: () => _logOut(context),
               text: "Logout",
               iconData: MdiIcons.logout),
+          // delete account button
           DrawerTile(
               onTap: () => _deleteAccount(context),
               text: "Delete account",
@@ -84,6 +95,7 @@ class SideDrawer extends StatelessWidget {
       ),
       ChangeBackgroundColor(
         children: [
+          // about app button
           DrawerTile(
             onTap: () {
               Navigator.of(context).push(
@@ -93,6 +105,7 @@ class SideDrawer extends StatelessWidget {
             text: "About app",
             iconData: Icons.info,
           ),
+          // contact us button
           DrawerTile(
             onTap: () {
               Navigator.of(context).push(

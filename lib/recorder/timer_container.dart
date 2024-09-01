@@ -45,6 +45,7 @@ class _TimerContainerState extends State<TimerContainer> {
 
   @override
   Widget build(BuildContext context) {
+    // timer decoration
     return widget.isPlayer
         ? StreamBuilder(
             stream: widget.playerController?.onCurrentDurationChanged,
@@ -65,7 +66,7 @@ class _TimerContainerState extends State<TimerContainer> {
   }
 
   Widget buildStyledTimerText(Duration duration) {
-    // format the duration to show minutes, seconds, and fraction of miliseconds
+    // format the duration to show minutes, seconds, and fraction of milliseconds
     final minutes = formatToTwoDigits(duration.inMinutes.remainder(60));
     final seconds = formatToTwoDigits(duration.inSeconds.remainder(60));
     final milliseconds =

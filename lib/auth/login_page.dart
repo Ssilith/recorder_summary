@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _remindEmail = TextEditingController();
 
-  // remeber me bool
+  // remember me bool
   bool _rememberMe = true;
 
   // check if is loading
@@ -73,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
+          // logo
           if (MediaQuery.of(context).viewInsets.bottom == 0)
             const SizedBox(
                 height: 250,
@@ -91,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text("Please fill in the fields below.",
                     style: TextStyle(color: Theme.of(context).hintColor)),
                 const SizedBox(height: 15),
+                // email input
                 TextInputForm(
                   width: size.width * 0.9,
                   hint: "Email",
@@ -98,6 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                   prefixIcon: const Icon(Icons.email),
                 ),
                 const SizedBox(height: 15),
+                // password input
                 TextInputForm(
                   width: size.width * 0.9,
                   hint: "Password",
@@ -105,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                   hideText: true,
                   prefixIcon: const Icon(Icons.lock),
                 ),
+                // remember me checkbox
                 SizedBox(
                   width: size.width * 0.9,
                   child: Row(
@@ -127,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextDivider(width: size.width * 0.9),
           const SizedBox(height: 15),
+          // sign in with google button
           GoogleSignInButton(
               width: size.width * 0.9,
               onPressed: () async {
@@ -140,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                 }
               }),
           const SizedBox(height: 20),
+          // login button
           Stack(
             children: [
               Center(
@@ -174,10 +180,12 @@ class _LoginPageState extends State<LoginPage> {
                 )
             ],
           ),
+          // forgot password button
           TextButton(
               onPressed: forgotPasswordWindow,
               child: const Text("Forgot password?")),
           if (MediaQuery.of(context).viewInsets.bottom == 0) const Spacer(),
+          // sign up button
           ChangeTextButton(
             text: "Don't have an account?",
             buttonTitle: "Sign up",

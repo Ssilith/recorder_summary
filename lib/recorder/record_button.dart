@@ -9,6 +9,7 @@ class RecordButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // record button decoration
     return (recordingState != RecordingState.recording &&
             recordingState != RecordingState.paused)
         ? IconButton(
