@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:recorder_summary/recorder/record_button.dart';
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recorder/wave_container.dart';
+import 'package:recorder_summary/services/noise_reduction_service.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/indicator.dart';
 import 'package:recorder_summary/widgets/message.dart';
@@ -341,8 +342,10 @@ class _MainRecorderState extends State<MainRecorder> {
                   bottom: 0,
                   right: 15,
                   child: FloatingActionButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // TODO: send to speech-to-text
+                      await NoiseReductionService()
+                          .uploadAudioFile(path!, "spectral_subtraction");
                     },
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: const CircleBorder(),

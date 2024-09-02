@@ -63,6 +63,9 @@ dependencies:
 
   # indicator
   loading_animation_widget: ^1.2.1
+
+  # api
+  http: ^1.2.2
   
 
 dev_dependencies:

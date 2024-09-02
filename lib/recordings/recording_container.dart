@@ -9,6 +9,7 @@ import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 import 'package:recorder_summary/recordings/play_icon.dart';
 import 'package:recorder_summary/recordings/speed_selector.dart';
+import 'package:recorder_summary/services/noise_reduction_service.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/dialogs/my_alert_dialog.dart';
 import 'package:recorder_summary/widgets/message.dart';
@@ -209,8 +210,12 @@ class _RecordingContainerState extends State<RecordingContainer> {
                                   ),
                                   // send to speech-to-text button
                                   GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
                                         // TODO: send to speech-to-text
+                                        await NoiseReductionService()
+                                            .uploadAudioFile(
+                                                widget.recording.path,
+                                                "median_filter_spectrogram");
                                       },
                                       child: Icon(MdiIcons.fileSendOutline,
                                           size: 22)),

@@ -15,6 +15,10 @@ import 'package:recorder_summary/side_drawer.dart';
 import 'package:recorder_summary/summary/main_summary.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 
+//**
+// Analiza porównawcza algorytmów redukcji szumów w rozpoznawaniu mowy na podstawie mobilnej aplikacji dyktafonowej.
+// */
+
 void main() async {
   // initialize app
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
