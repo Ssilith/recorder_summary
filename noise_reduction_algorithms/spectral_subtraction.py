@@ -16,7 +16,7 @@ def spectral_subtraction(y, sr, noise_frames=10, alpha=4):
         np.array: Noise-reduced signal.
     """
     # Frame size and overlap
-    frame_size = int(0.025 * sr)  # 25 ms frame
+    frame_size = int(0.032 * sr)  # 32 ms frame
     hop_size = frame_size // 2  # 50% overlap
 
     # Compute the short-time Fourier transform (STFT)

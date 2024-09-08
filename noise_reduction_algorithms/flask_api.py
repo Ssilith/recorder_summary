@@ -8,7 +8,7 @@ from pydub import AudioSegment
 import numpy as np
 from io import BytesIO
 import os
-import tempfile  # Import the tempfile module
+import tempfile
 
 app = Flask(__name__)
 CORS(app)
@@ -16,16 +16,17 @@ CORS(app)
 
 @app.route("/process_audio", methods=["POST"])
 def process_audio():
-    algorithm = request.args.get(
-        "algorithm", "spectral_subtraction"
-    )  # Default algorithm if none specified
+    # Get algorithm
+    algorithm = request.args.get("algorithm", "spectral_subtraction")
+
+    # Get file
     if "file" not in request.files:
         return "No file part", 400
     file = request.files["file"]
     if file.filename == "" or not file.filename.endswith(".m4a"):
         return "No selected file or unsupported file type", 400
 
-    # Read file into BytesIO stream directly
+    # Read file into bytes stream
     file_stream = BytesIO(file.read())
     try:
         data, sr = load_audio(file_stream)
@@ -40,9 +41,9 @@ def process_audio():
     elif algorithm == "median_filter_spectrogram":
         processed_data = median_filter_spectrogram(data, sr)
     else:
-        return "Invalid algorithm specified", 400
+        processed_data = data
 
-    # Temporary file is created for the output
+    # Temporary file for the output
     output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
     save_audio(processed_data, sr, output_path)
     return send_file(
@@ -51,16 +52,17 @@ def process_audio():
 
 
 def load_audio(file_stream):
-    # Using pydub to load from BytesIO
+    # Load from bytes
     audio = AudioSegment.from_file(file_stream)
     samples = np.array(audio.get_array_of_samples())
     if audio.channels == 2:
         samples = samples.reshape((-1, 2))
-        samples = samples.mean(axis=1)  # Convert to mono by averaging channels
+        samples = samples.mean(axis=1)
     return samples, audio.frame_rate
 
 
 def save_audio(output, sr, file_path="output.wav"):
+    # Save audio
     output_segment = AudioSegment(
         output.tobytes(), frame_rate=sr, sample_width=output.dtype.itemsize, channels=1
     )

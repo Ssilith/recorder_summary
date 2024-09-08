@@ -16,7 +16,7 @@ def wiener_filter(y, sr, noise_frames=10):
     """
     # Frame size and overlap
     frame_size = int(0.032 * sr)  # 32 ms frame
-    hop_size = frame_size // 2
+    hop_size = frame_size // 2  # 50% overlap
 
     # Compute the STFT
     f, t, Zxx = scipy.signal.stft(

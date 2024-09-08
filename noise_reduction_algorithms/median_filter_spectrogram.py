@@ -15,8 +15,8 @@ def median_filter_spectrogram(y, sr, kernel_size=3):
         np.array: Noise-reduced signal.
     """
     # Frame size and overlap
-    frame_size = int(0.032 * sr)
-    hop_size = frame_size // 2
+    frame_size = int(0.032 * sr)  # 25 ms frame
+    hop_size = frame_size // 2  # 50% overlap
 
     # Compute the STFT
     f, t, Zxx = scipy.signal.stft(
