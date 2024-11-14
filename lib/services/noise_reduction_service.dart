@@ -9,7 +9,7 @@ class NoiseReductionService {
   final String _urlPrefix = NetworkService.getApiUrl();
 
   Map<String, String> headers = <String, String>{
-    'Content-Type': 'application/json; charset=UTF-8',
+    'Content-Type': 'application/json; charset=UTF-8'
   };
 
   Future<void> uploadAudioFile(String filePath, String algorithm) async {
@@ -17,13 +17,13 @@ class NoiseReductionService {
       var uri = Uri.parse('$_urlPrefix/process_audio?algorithm=$algorithm');
       var request = http.MultipartRequest('POST', uri);
 
-      // Attach the file to the request
+      // attach the file to the request
       request.files.add(await http.MultipartFile.fromPath('file', filePath));
 
-      // Sending the request
+      // sending the request
       var streamedResponse = await request.send();
 
-      // Handling the response
+      // handling the response
       var response = await http.Response.fromStream(streamedResponse);
 
       if (kDebugMode) {
@@ -32,11 +32,11 @@ class NoiseReductionService {
       }
 
       if (response.statusCode == 200) {
-        // Get the directory to save the downloaded files
+        // get the directory to save the downloaded files
         Directory directory = await getApplicationDocumentsDirectory();
         File file = File(path.join(directory.path, "processed_output.wav"));
 
-        // Write the file
+        // write the file
         await file.writeAsBytes(response.bodyBytes);
 
         if (kDebugMode) {

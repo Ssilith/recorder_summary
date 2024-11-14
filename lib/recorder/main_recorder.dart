@@ -5,11 +5,12 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:recorder_summary/recorder/bottom_modal_settings.dart';
 import 'package:recorder_summary/recorder/record_button.dart';
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recorder/wave_container.dart';
-import 'package:recorder_summary/services/noise_reduction_service.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/indicator.dart';
 import 'package:recorder_summary/widgets/message.dart';
@@ -342,11 +343,11 @@ class _MainRecorderState extends State<MainRecorder> {
                   bottom: 0,
                   right: 15,
                   child: FloatingActionButton(
-                    onPressed: () async {
-                      // TODO: send to speech-to-text
-                      await NoiseReductionService()
-                          .uploadAudioFile(path!, "spectral_subtraction");
-                    },
+                    onPressed: () => showMaterialModalBottomSheet(
+                      context: context,
+                      builder: (context) =>
+                          BottomModalSettings(recordingPath: path!),
+                    ),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     shape: const CircleBorder(),
                     child: Icon(MdiIcons.fileSendOutline,

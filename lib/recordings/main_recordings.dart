@@ -66,7 +66,8 @@ class _MainRecordingsState extends State<MainRecordings> {
 
     // find files and parse to AudioRecording class
     for (FileSystemEntity entity in files) {
-      if (entity is File && entity.path.endsWith('.m4a')) {
+      if (entity is File &&
+          (entity.path.endsWith('.m4a') || entity.path.endsWith('.wav'))) {
         FileStat fileStat = await entity.stat();
         DateTime creationDate = fileStat.changed;
         Duration? duration = await _getAudioDuration(entity.path);

@@ -66,6 +66,9 @@ dependencies:
 
   # api
   http: ^1.2.2
+
+  # bottom modal
+  modal_bottom_sheet: ^3.0.0
   
 
 dev_dependencies:
