@@ -11,7 +11,7 @@ import 'package:recorder_summary/widgets/buttons/round_button.dart';
 import 'package:recorder_summary/widgets/dialogs/alert_dialog_with_text_field.dart';
 import 'package:recorder_summary/widgets/indicator.dart';
 import 'package:recorder_summary/widgets/message.dart';
-import 'package:recorder_summary/widgets/text_inputs/text_divider.dart';
+import 'package:recorder_summary/widgets/text_divider.dart';
 import 'package:recorder_summary/widgets/text_inputs/text_input_form.dart';
 
 class LoginPage extends StatefulWidget {

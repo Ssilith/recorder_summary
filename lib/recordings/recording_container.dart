@@ -4,9 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:recorder_summary/recorder/bottom_modal_settings.dart';
 import 'package:recorder_summary/recorder/timer_container.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
 import 'package:recorder_summary/recordings/play_icon.dart';
@@ -194,33 +191,13 @@ class _RecordingContainerState extends State<RecordingContainer> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // file name
-                                  Expanded(
-                                    child: Text(
-                                      widget.recording.fileName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                  // send to speech-to-text button
-                                  GestureDetector(
-                                      onTap: () => showMaterialModalBottomSheet(
-                                            context: context,
-                                            builder: (context) =>
-                                                BottomModalSettings(
-                                                    recordingPath:
-                                                        widget.recording.path),
-                                          ),
-                                      child: Icon(MdiIcons.fileSendOutline,
-                                          size: 22)),
-                                ],
+                              Text(
+                                widget.recording.fileName,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                               ),
                               const SizedBox(height: 5),
                               Row(

@@ -12,12 +12,7 @@ import 'package:recorder_summary/firebase_options.dart';
 import 'package:recorder_summary/providers/auth_provider.dart';
 import 'package:recorder_summary/recorder/main_recorder.dart';
 import 'package:recorder_summary/side_drawer.dart';
-import 'package:recorder_summary/summary/main_summary.dart';
 import 'package:recorder_summary/recordings/main_recordings.dart';
-
-//**
-// Analiza porównawcza algorytmów redukcji szumów w rozpoznawaniu mowy na podstawie mobilnej aplikacji dyktafonowej.
-// */
 
 void main() async {
   // initialize app
@@ -108,8 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // icons of navigation
   final List<IconData> _icons = [
     FontAwesomeIcons.microphone,
-    FontAwesomeIcons.headphones,
-    FontAwesomeIcons.inbox,
+    FontAwesomeIcons.headphones
   ];
 
   @override
@@ -123,8 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // main pages
     final List<Widget> bottomBarPages = [
       const MainRecorder(),
-      const MainRecordings(),
-      const MainSummary(),
+      const MainRecordings()
     ];
 
     return Scaffold(
