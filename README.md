@@ -20,15 +20,16 @@
       <img src="assets/login_screen.jpg" alt="Login Screen" width="200">
     </td>
     <td align="center">
-      <img src="assets/home_screen.jpg.png" alt="Home Screen" width="200">
+      <img src="assets/home_screen.jpg" alt="Home Screen" width="200">
     </td>
     <td align="center">
-      <img src="assets/recordings_screen.jpg.png" alt="Recording Screen" width="200">
+      <img src="assets/recordings_screen.jpg" alt="Recordings Screen" width="200">
     </td>
   </tr>
   <tr>
     <td align="center">Login Screen</td>
     <td align="center">Home Screen</td>
+    <td align="center">Recordings Screen</td>
   </tr>
 </table>
 <h3>Technical Details:</h3>
