@@ -34,5 +34,5 @@
 </table>
 <h3>Technical Details:</h3>
 <p>
-    The Recorder Summary app is built using Flutter, a powerful framework for building natively compiled mobile applications. This allows the app to be available on both iOS and Android platforms, providing a seamless experience across devices.
+    The Recorder Summary app is built using Flutter (version 3.19.6), a powerful framework for building natively compiled mobile applications. This allows the app to be available on both iOS and Android platforms, providing a seamless experience across devices.
 </p>
